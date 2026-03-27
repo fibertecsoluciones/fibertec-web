@@ -1,19 +1,45 @@
 // ========================================
-// CONTROL DE PAGOS - ADMINISTRACIÓN
+// CONTROL DE PAGOS - CON API (PostgreSQL)
 // ========================================
+
+const API_URL = '/api';
 
 let clientesGlobal = [];
 let pagosGlobal = [];
 
-function cargarDatos() {
-    clientesGlobal = JSON.parse(localStorage.getItem('fibertec_clientes') || '[]');
-    pagosGlobal = JSON.parse(localStorage.getItem('fibertec_pagos') || '[]');
-    actualizarTabla();
-    actualizarResumen();
+// ========================================
+// CARGAR DATOS DESDE LA API
+// ========================================
+
+async function cargarDatos() {
+    try {
+        // Cargar clientes
+        const resClientes = await fetch(`${API_URL}/clientes`);
+        clientesGlobal = await resClientes.json();
+        
+        // Cargar todos los pagos (podrías tener un endpoint específico)
+        // Por ahora, cargamos pagos de cada cliente (puede optimizarse después)
+        pagosGlobal = [];
+        for (const cliente of clientesGlobal) {
+            const resPagos = await fetch(`${API_URL}/clientes/${cliente.id}/pagos`);
+            const pagos = await resPagos.json();
+            pagosGlobal.push(...pagos);
+        }
+        
+        actualizarTabla();
+        actualizarResumen();
+    } catch (error) {
+        console.error('Error al cargar datos:', error);
+        mostrarError('Error al cargar datos del servidor');
+    }
 }
 
+// ========================================
+// OBTENER ESTADO DE PAGO DE UN CLIENTE
+// ========================================
+
 function obtenerEstadoPago(cliente) {
-    const pagosCliente = pagosGlobal.filter(p => p.clienteId === cliente.id);
+    const pagosCliente = pagosGlobal.filter(p => p.cliente_id === cliente.id);
     const ultimoPago = pagosCliente.sort((a,b) => new Date(b.fecha) - new Date(a.fecha))[0];
     
     if (!ultimoPago) {
@@ -43,6 +69,10 @@ function obtenerEstadoPago(cliente) {
     }
 }
 
+// ========================================
+// UTILIDADES
+// ========================================
+
 function obtenerMontoPlan(plan) {
     const montos = { navega: 400, vuelo: 500, elite: 600 };
     return montos[plan] || 400;
@@ -59,6 +89,10 @@ function escapeHtml(text) {
     div.textContent = text;
     return div.innerHTML;
 }
+
+// ========================================
+// MODAL Y FORMULARIO
+// ========================================
 
 let clienteSeleccionado = null;
 
@@ -86,22 +120,32 @@ function abrirModalPago(clienteId) {
     modal.classList.add('active');
 }
 
-function verHistorialPagos(clienteId) {
-    const pagosCliente = pagosGlobal.filter(p => p.clienteId === clienteId).sort((a,b) => new Date(b.fecha) - new Date(a.fecha));
-    const cliente = clientesGlobal.find(c => c.id === clienteId);
-    
-    if (pagosCliente.length === 0) {
-        alert(`❌ ${cliente.nombre} no tiene pagos registrados aún`);
-        return;
+async function verHistorialPagos(clienteId) {
+    try {
+        const response = await fetch(`${API_URL}/clientes/${clienteId}/pagos`);
+        const pagos = await response.json();
+        const cliente = clientesGlobal.find(c => c.id === clienteId);
+        
+        if (pagos.length === 0) {
+            alert(`❌ ${cliente.nombre} no tiene pagos registrados aún`);
+            return;
+        }
+        
+        let historial = `📋 HISTORIAL DE PAGOS\nCliente: ${cliente.nombre}\n\n`;
+        pagos.forEach(p => {
+            historial += `📅 ${p.fecha} | $${p.monto} | ${p.metodo} | Ref: ${p.referencia || 'N/A'}\n`;
+        });
+        
+        alert(historial);
+    } catch (error) {
+        console.error('Error al cargar historial:', error);
+        alert('Error al cargar el historial de pagos');
     }
-    
-    let historial = `📋 HISTORIAL DE PAGOS\nCliente: ${cliente.nombre}\n\n`;
-    pagosCliente.forEach(p => {
-        historial += `📅 ${p.fecha} | $${p.monto} | ${p.metodo} | Ref: ${p.referencia || 'N/A'}\n`;
-    });
-    
-    alert(historial);
 }
+
+// ========================================
+// ACTUALIZAR TABLA
+// ========================================
 
 function actualizarTabla() {
     const tbody = document.getElementById('tablaPagosBody');
@@ -124,6 +168,7 @@ function actualizarTabla() {
         monto: obtenerMontoPlan(c.plan)
     }));
     
+    // Aplicar filtros
     if (filtroEstado !== 'todos') {
         const filtrados = clientesConEstado.filter(c => {
             if (filtroEstado === 'aldia') return c.estadoPago.estado === 'aldia';
@@ -131,12 +176,12 @@ function actualizarTabla() {
             if (filtroEstado === 'pagohoy') {
                 const hoy = new Date().toISOString().split('T')[0];
                 const pagosHoy = pagosGlobal.filter(p => p.fecha === hoy);
-                return pagosHoy.some(p => p.clienteId === c.id);
+                return pagosHoy.some(p => p.cliente_id === c.id);
             }
             if (filtroEstado === 'esteMes') {
                 const mesActual = new Date().toISOString().slice(0,7);
                 const pagosEsteMes = pagosGlobal.filter(p => p.fecha.startsWith(mesActual));
-                return pagosEsteMes.some(p => p.clienteId === c.id);
+                return pagosEsteMes.some(p => p.cliente_id === c.id);
             }
             return true;
         });
@@ -146,7 +191,7 @@ function actualizarTabla() {
     
     if (filtroMes) {
         const filtrados = clientesConEstado.filter(c => {
-            const pagosEnMes = pagosGlobal.filter(p => p.fecha.startsWith(filtroMes) && p.clienteId === c.id);
+            const pagosEnMes = pagosGlobal.filter(p => p.fecha.startsWith(filtroMes) && p.cliente_id === c.id);
             return pagosEnMes.length > 0;
         });
         clientesConEstado.length = 0;
@@ -181,6 +226,10 @@ function actualizarTabla() {
     `).join('');
 }
 
+// ========================================
+// ACTUALIZAR RESUMEN
+// ========================================
+
 function actualizarResumen() {
     const total = clientesGlobal.length;
     let aldia = 0, mora = 0, totalRecaudado = 0;
@@ -202,7 +251,45 @@ function actualizarResumen() {
     document.getElementById('totalRecaudado').textContent = `$${totalRecaudado.toLocaleString()}`;
 }
 
-// Event listeners
+// ========================================
+// REGISTRAR PAGO VÍA API
+// ========================================
+
+async function registrarPago(pago) {
+    try {
+        const response = await fetch(`${API_URL}/pagos`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(pago)
+        });
+        
+        if (!response.ok) throw new Error('Error al registrar pago');
+        
+        const nuevoPago = await response.json();
+        
+        // Actualizar pagosGlobal localmente
+        pagosGlobal.push(nuevoPago);
+        
+        return nuevoPago;
+    } catch (error) {
+        console.error('Error al registrar pago:', error);
+        throw error;
+    }
+}
+
+// ========================================
+// MOSTRAR ERROR
+// ========================================
+
+function mostrarError(mensaje) {
+    const tbody = document.getElementById('tablaPagosBody');
+    tbody.innerHTML = `<tr><td colspan="10"><div class="sin-pagos"><i class="fas fa-exclamation-triangle"></i><p>${mensaje}</p></div></td></tr>`;
+}
+
+// ========================================
+// EVENTOS
+// ========================================
+
 document.addEventListener('DOMContentLoaded', function() {
     cargarDatos();
     
@@ -229,30 +316,33 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('modalPago').classList.remove('active');
     });
     
-    document.getElementById('formRegistroPago').addEventListener('submit', (e) => {
+    document.getElementById('formRegistroPago').addEventListener('submit', async (e) => {
         e.preventDefault();
         
+        if (!clienteSeleccionado) return;
+        
         const nuevoPago = {
-            id: Date.now(),
             clienteId: clienteSeleccionado.id,
             fecha: document.getElementById('fechaPago').value,
             monto: parseFloat(document.getElementById('montoPago').value),
             metodo: document.getElementById('metodoPago').value,
             referencia: document.getElementById('referenciaPago').value,
             notas: document.getElementById('notasPago').value,
-            registradoPor: 'admin',
-            fechaRegistro: new Date().toISOString()
+            registradoPor: 'admin'
         };
         
-        pagosGlobal.push(nuevoPago);
-        localStorage.setItem('fibertec_pagos', JSON.stringify(pagosGlobal));
-        
-        document.getElementById('modalPago').classList.remove('active');
-        document.getElementById('formRegistroPago').reset();
-        
-        actualizarTabla();
-        actualizarResumen();
-        
-        alert(`✅ Pago registrado para ${clienteSeleccionado.nombre}\nMonto: $${nuevoPago.monto}\nFecha: ${nuevoPago.fecha}`);
+        try {
+            await registrarPago(nuevoPago);
+            
+            document.getElementById('modalPago').classList.remove('active');
+            document.getElementById('formRegistroPago').reset();
+            
+            // Recargar datos para actualizar la tabla
+            await cargarDatos();
+            
+            alert(`✅ Pago registrado para ${clienteSeleccionado.nombre}\nMonto: $${nuevoPago.monto}\nFecha: ${nuevoPago.fecha}`);
+        } catch (error) {
+            alert('❌ Error al registrar el pago');
+        }
     });
 });
