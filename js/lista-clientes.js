@@ -1,22 +1,41 @@
 // ========================================
-// LISTA DE CLIENTES - VERSIÓN TABLA
+// LISTA DE CLIENTES - CON API (PostgreSQL)
 // ========================================
+
+const API_URL = '/api';
 
 let clientesGlobal = [];
 
-function cargarClientes() {
-    const clientes = JSON.parse(localStorage.getItem('fibertec_clientes') || '[]');
-    clientesGlobal = clientes.reverse();
-    actualizarTabla();
+async function cargarClientes() {
+    try {
+        const response = await fetch(`${API_URL}/clientes`);
+        const clientes = await response.json();
+        clientesGlobal = clientes;
+        actualizarTabla();
+        actualizarContador();
+    } catch (error) {
+        console.error('Error al cargar clientes:', error);
+        mostrarError();
+    }
 }
 
 function actualizarTabla() {
     const tbody = document.getElementById('tablaClientesBody');
-    const totalClientesSpan = document.getElementById('totalClientes');
+    const buscador = document.getElementById('buscadorTabla').value.toLowerCase();
     
-    totalClientesSpan.textContent = clientesGlobal.length;
+    let clientesFiltrados = clientesGlobal;
     
-    if (clientesGlobal.length === 0) {
+    if (buscador) {
+        clientesFiltrados = clientesGlobal.filter(c => 
+            c.nombre?.toLowerCase().includes(buscador) ||
+            c.telefono1?.includes(buscador) ||
+            c.colonia?.toLowerCase().includes(buscador) ||
+            c.ip?.includes(buscador) ||
+            c.mac?.toLowerCase().includes(buscador)
+        );
+    }
+    
+    if (clientesFiltrados.length === 0) {
         tbody.innerHTML = `
             <tr class="sin-registros">
                 <td colspan="11">
@@ -24,27 +43,32 @@ function actualizarTabla() {
                         <i class="fas fa-database"></i>
                         <p>No hay clientes registrados aún</p>
                     </div>
-                </td>
-            </tr>
+                 </td>
+             </tr>
         `;
         return;
     }
     
-    tbody.innerHTML = clientesGlobal.map(cliente => `
+    tbody.innerHTML = clientesFiltrados.map(cliente => `
         <tr>
             <td><span class="cliente-id">#${cliente.id}</span></td>
             <td><span class="cliente-nombre">${escapeHtml(cliente.nombre)}</span></td>
-            <td><span class="cliente-telefono">${cliente.telefono1} ${cliente.telefono2 ? ' / ' + cliente.telefono2 : ''}</span></td>
+            <td>${cliente.telefono1} ${cliente.telefono2 ? ' / ' + cliente.telefono2 : ''}</td>
             <td>${escapeHtml(cliente.colonia)}</td>
             <td>${getPlanBadge(cliente.plan)}</td>
             <td><span class="cliente-ip">${cliente.ip || 'N/A'}</span></td>
             <td><span class="cliente-mac">${cliente.mac || 'N/A'}</span></td>
-            <td>${cliente.marcaModem || ''} ${cliente.modeloModem || ''}</td>
+            <td>${cliente.marca_modem || ''} ${cliente.modelo_modem || ''}</td>
             <td>${escapeHtml(cliente.tecnico || 'N/A')}</td>
-            <td>${cliente.fechaInstalacion || cliente.fechaRegistro?.split(',')[0] || 'N/A'}</td>
+            <td>${cliente.fecha_instalacion || cliente.fecha_registro?.split('T')[0] || 'N/A'}</td>
             <td>${cliente.foto ? `<img src="${cliente.foto}" class="foto-miniatura" alt="Módem" onclick="verFoto('${cliente.id}')">` : 'Sin foto'}</td>
         </tr>
     `).join('');
+}
+
+function actualizarContador() {
+    const total = clientesGlobal.length;
+    document.getElementById('totalClientes').textContent = total;
 }
 
 function getPlanBadge(plan) {
@@ -65,8 +89,7 @@ function escapeHtml(text) {
 }
 
 function verFoto(id) {
-    const clientes = JSON.parse(localStorage.getItem('fibertec_clientes') || '[]');
-    const cliente = clientes.find(c => c.id == id);
+    const cliente = clientesGlobal.find(c => c.id == id);
     if (cliente && cliente.foto) {
         const ventana = window.open();
         ventana.document.write(`
@@ -80,47 +103,36 @@ function verFoto(id) {
     }
 }
 
-// Buscar clientes
-function buscarClientes() {
-    const busqueda = document.getElementById('buscadorTabla').value.toLowerCase().trim();
-    if (!busqueda) {
-        clientesGlobal = JSON.parse(localStorage.getItem('fibertec_clientes') || '[]').reverse();
-        actualizarTabla();
-        return;
-    }
-    
-    const todosClientes = JSON.parse(localStorage.getItem('fibertec_clientes') || '[]');
-    clientesGlobal = todosClientes.reverse().filter(cliente => 
-        cliente.nombre?.toLowerCase().includes(busqueda) ||
-        cliente.telefono1?.includes(busqueda) ||
-        cliente.telefono2?.includes(busqueda) ||
-        cliente.colonia?.toLowerCase().includes(busqueda) ||
-        cliente.ip?.includes(busqueda) ||
-        cliente.mac?.toLowerCase().includes(busqueda) ||
-        cliente.tecnico?.toLowerCase().includes(busqueda)
-    );
-    actualizarTabla();
+function mostrarError() {
+    const tbody = document.getElementById('tablaClientesBody');
+    tbody.innerHTML = `
+        <tr class="sin-registros">
+            <td colspan="11">
+                <div class="sin-clientes">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <p>Error al cargar clientes. Verifica la conexión con el servidor.</p>
+                </div>
+            </td>
+        </tr>
+    `;
 }
 
+// Eventos
 document.addEventListener('DOMContentLoaded', function() {
     cargarClientes();
     
-    const btnExportar = document.getElementById('btnExportar');
-    if (btnExportar) {
-        btnExportar.addEventListener('click', () => {
-            const clientes = localStorage.getItem('fibertec_clientes');
-            const blob = new Blob([clientes], {type: 'application/json'});
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `fibertec_clientes_${new Date().toISOString().split('T')[0]}.json`;
-            a.click();
-            URL.revokeObjectURL(url);
-        });
-    }
+    document.getElementById('buscadorTabla').addEventListener('input', () => {
+        actualizarTabla();
+    });
     
-    const buscador = document.getElementById('buscadorTabla');
-    if (buscador) {
-        buscador.addEventListener('input', buscarClientes);
-    }
+    document.getElementById('btnExportar').addEventListener('click', () => {
+        const dataStr = JSON.stringify(clientesGlobal, null, 2);
+        const blob = new Blob([dataStr], {type: 'application/json'});
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `fibertec_clientes_${new Date().toISOString().split('T')[0]}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+    });
 });
