@@ -317,32 +317,45 @@ document.addEventListener('DOMContentLoaded', function() {
     });
     
     document.getElementById('formRegistroPago').addEventListener('submit', async (e) => {
-        e.preventDefault();
+    e.preventDefault();
+    
+    if (!clienteSeleccionado) return;
+    
+    const btnSubmit = e.target.querySelector('button[type="submit"]');
+    const textoOriginal = btnSubmit.innerHTML;
+    
+    // Deshabilitar botón para evitar múltiples envíos
+    btnSubmit.disabled = true;
+    btnSubmit.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
+    
+    const nuevoPago = {
+        clienteId: clienteSeleccionado.id,
+        fecha: document.getElementById('fechaPago').value,
+        monto: parseFloat(document.getElementById('montoPago').value),
+        metodo: document.getElementById('metodoPago').value,
+        referencia: document.getElementById('referenciaPago').value,
+        notas: document.getElementById('notasPago').value,
+        registradoPor: 'admin'
+    };
+    
+    try {
+        await registrarPago(nuevoPago);
         
-        if (!clienteSeleccionado) return;
+        // Cerrar modal y resetear formulario
+        document.getElementById('modalPago').classList.remove('active');
+        document.getElementById('formRegistroPago').reset();
         
-        const nuevoPago = {
-            clienteId: clienteSeleccionado.id,
-            fecha: document.getElementById('fechaPago').value,
-            monto: parseFloat(document.getElementById('montoPago').value),
-            metodo: document.getElementById('metodoPago').value,
-            referencia: document.getElementById('referenciaPago').value,
-            notas: document.getElementById('notasPago').value,
-            registradoPor: 'admin'
-        };
+        // Recargar datos
+        await cargarDatos();
         
-        try {
-            await registrarPago(nuevoPago);
-            
-            document.getElementById('modalPago').classList.remove('active');
-            document.getElementById('formRegistroPago').reset();
-            
-            // Recargar datos para actualizar la tabla
-            await cargarDatos();
-            
-            alert(`✅ Pago registrado para ${clienteSeleccionado.nombre}\nMonto: $${nuevoPago.monto}\nFecha: ${nuevoPago.fecha}`);
-        } catch (error) {
-            alert('❌ Error al registrar el pago');
-        }
-    });
+        alert(`✅ Pago registrado para ${clienteSeleccionado.nombre}\nMonto: $${nuevoPago.monto}\nFecha: ${nuevoPago.fecha}`);
+    } catch (error) {
+        console.error(error);
+        alert('❌ Error al registrar el pago');
+    } finally {
+        // Reactivar botón
+        btnSubmit.disabled = false;
+        btnSubmit.innerHTML = textoOriginal;
+    }
+});
 });
