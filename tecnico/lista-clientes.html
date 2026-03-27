@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FiberTec - Clientes Registrados</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="../css/main.css">
+</head>
+<body>
+    <div class="container-tecnico">
+        <header class="header-tecnico">
+            <div class="logo-tecnico">
+                <i class="fas fa-satellite-dish"></i>
+                <span>Fiber<span>Tec</span></span>
+            </div>
+            <h1>📋 Clientes Registrados</h1>
+            <p>Lista de instalaciones realizadas</p>
+        </header>
+
+        <!-- Controles de la tabla -->
+        <div class="tabla-controles">
+            <div class="buscador-tabla">
+                <i class="fas fa-search"></i>
+                <input type="text" id="buscadorTabla" placeholder="Buscar cliente, teléfono o colonia...">
+            </div>
+            <div class="contador-clientes">
+                <span id="totalClientes">0</span> clientes registrados
+            </div>
+        </div>
+
+        <!-- Tabla de clientes -->
+        <div class="tabla-clientes-container">
+            <table class="tabla-clientes" id="tablaClientes">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Cliente</th>
+                        <th>Teléfono</th>
+                        <th>Colonia</th>
+                        <th>Plan</th>
+                        <th>IP</th>
+                        <th>MAC</th>
+                        <th>Módem</th>
+                        <th>Técnico</th>
+                        <th>Fecha</th>
+                        <th>Foto</th>
+                    </tr>
+                </thead>
+                <tbody id="tablaClientesBody">
+                    <tr class="sin-registros">
+                        <td colspan="11">
+                            <div class="sin-clientes">
+                                <i class="fas fa-database"></i>
+                                <p>No hay clientes registrados aún</p>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="botones-form">
+            <a href="alta-cliente.html" class="btn-primario">
+                <i class="fas fa-plus"></i> Nuevo Cliente
+            </a>
+            <button type="button" class="btn-secundario" id="btnExportar">
+                <i class="fas fa-download"></i> Exportar
+            </button>
+        </div>
+    </div>
+
+    <script src="../js/lista-clientes.js"></script>
+</body>
+</html>

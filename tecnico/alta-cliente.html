@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>FiberTec - Alta de Cliente (Técnicos)</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+     <link rel="stylesheet" href="../css/main.css">
+</head>
+<body>
+    <div class="container-tecnico">
+        <header class="header-tecnico">
+            <div class="logo-tecnico">
+                <i class="fas fa-satellite-dish"></i>
+                <span>Fiber<span>Tec</span></span>
+            </div>
+            <h1>📋 Alta de Cliente</h1>
+            <p>Completa todos los campos para registrar una nueva instalación</p>
+        </header>
+
+        <form id="formAltaCliente" class="form-tecnico">
+            <!-- Datos del cliente -->
+            <div class="seccion-formulario">
+                <h2><i class="fas fa-user"></i> Datos del Cliente</h2>
+                
+                <div class="campo">
+                    <label>Nombre completo *</label>
+                    <input type="text" id="nombre" required placeholder="Ej: Juan Pérez García">
+                </div>
+                
+                <div class="campo">
+                    <label>Teléfono 1 *</label>
+                    <input type="tel" id="telefono1" required placeholder="921 123 4567">
+                </div>
+                
+                <div class="campo">
+                    <label>Teléfono 2 (opcional)</label>
+                    <input type="tel" id="telefono2" placeholder="921 765 4321">
+                </div>
+                
+                <div class="campo">
+                    <label>Colonia / Localidad *</label>
+                    <input type="text" id="colonia" required placeholder="Ej: Popotla, San Pedro Mezcalapa...">
+                </div>
+                
+                <div class="campo">
+                    <label>Dirección completa *</label>
+                    <textarea id="direccion" rows="2" required placeholder="Calle, número, referencias..."></textarea>
+                </div>
+                
+                <div class="campo">
+                    <label>Coordenadas (Google Maps)</label>
+                    <div class="coordenadas-input">
+                        <input type="text" id="lat" placeholder="Latitud">
+                        <input type="text" id="lng" placeholder="Longitud">
+                        <button type="button" id="btnObtenerCoords" class="btn-secundario">
+                            <i class="fas fa-map-marker-alt"></i> Obtener
+                        </button>
+                    </div>
+                    <small class="ayuda">Pega el enlace de Google Maps o usa el botón para obtener tu ubicación</small>
+                </div>
+            </div>
+
+            <!-- Datos del plan -->
+            <div class="seccion-formulario">
+                <h2><i class="fas fa-wifi"></i> Plan Contratado</h2>
+                
+                <div class="campo">
+                    <label>Plan *</label>
+                    <select id="plan" required>
+                        <option value="">Selecciona un plan</option>
+                        <option value="navega">NAVEGA - 20 MBPS - $400</option>
+                        <option value="vuelo">VUELO - 30 MBPS - $500</option>
+                        <option value="elite">ELITE - 40 MBPS - $600</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Datos de instalación -->
+            <div class="seccion-formulario">
+                <h2><i class="fas fa-tools"></i> Datos de Instalación</h2>
+                
+                <div class="campo">
+                    <label>IP asignada *</label>
+                    <input type="text" id="ip" required placeholder="Ej: 192.168.1.100">
+                </div>
+                
+                <div class="campo">
+                    <label>MAC del módem *</label>
+                    <input type="text" id="mac" required placeholder="AA:BB:CC:DD:EE:FF">
+                </div>
+                
+                <div class="campo">
+                    <label>Marca del módem *</label>
+                    <input type="text" id="marcaModem" required placeholder="Ej: Huawei, TP-Link, ZTE...">
+                </div>
+                
+                <div class="campo">
+                    <label>Modelo del módem *</label>
+                    <input type="text" id="modeloModem" required placeholder="Ej: HG8145V5, Archer C6...">
+                </div>
+                
+                <div class="campo">
+                    <label>Serial del módem *</label>
+                    <input type="text" id="serialModem" required placeholder="Número de serie">
+                </div>
+            </div>
+
+            <!-- Foto del módem instalado -->
+            <div class="seccion-formulario">
+                <h2><i class="fas fa-camera"></i> Evidencia de Instalación</h2>
+                
+                <div class="campo-foto">
+    <label>Foto del módem instalado *</label>
+    <div class="area-foto" id="areaFoto">
+        <i class="fas fa-camera"></i>
+        <p>Tomar foto o seleccionar archivo</p>
+        <input type="file" id="fotoModem" accept="image/*" capture="environment">
+    </div>
+    <div id="previewFoto" class="preview-foto"></div>
+</div>
+                
+                <div class="campo">
+                    <label>Fecha de instalación *</label>
+                    <input type="date" id="fechaInstalacion" required>
+                </div>
+                
+                <div class="campo">
+                    <label>Observaciones</label>
+                    <textarea id="observaciones" rows="3" placeholder="Notas adicionales, dificultades, etc..."></textarea>
+                </div>
+            </div>
+
+            <!-- Técnico -->
+            <div class="seccion-formulario">
+                <h2><i class="fas fa-user-cog"></i> Técnico Responsable</h2>
+                
+                <div class="campo">
+                    <label>Nombre del técnico *</label>
+                    <input type="text" id="tecnico" required placeholder="Tu nombre">
+                </div>
+            </div>
+
+            <!-- Botones -->
+            <div class="botones-form">
+                <button type="submit" class="btn-primario" id="btnGuardar">
+                    <i class="fas fa-save"></i> Guardar Cliente
+                </button>
+                <button type="button" class="btn-secundario" id="btnLimpiar">
+                    <i class="fas fa-eraser"></i> Limpiar
+                </button>
+            </div>
+        </form>
+
+        <div id="mensajeConfirmacion" class="mensaje-confirmacion"></div>
+    </div>
+
+    <script src="../js/alta-clientes.js"></script>
+</body>
+</html>

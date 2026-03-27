@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FiberTec - Control de Pagos</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="../css/main.css">
+</head>
+<body>
+    <div class="container-pagos">
+        <header class="header-pagos">
+            <div class="logo-pagos">
+                <i class="fas fa-chart-line"></i>
+                <span>Fiber<span>Tec</span></span>
+                <span class="badge-admin">ADMIN</span>
+            </div>
+            <h1>💰 Control de Pagos</h1>
+            <p>Gestiona los pagos de tus clientes</p>
+        </header>
+
+        <!-- Resumen de cobranza -->
+        <div class="resumen-cobranza">
+            <div class="tarjeta-resumen">
+                <i class="fas fa-users"></i>
+                <div>
+                    <h3 id="totalClientes">0</h3>
+                    <p>Clientes totales</p>
+                </div>
+            </div>
+            <div class="tarjeta-resumen">
+                <i class="fas fa-check-circle"></i>
+                <div>
+                    <h3 id="clientesAlDia">0</h3>
+                    <p>Clientes al día</p>
+                </div>
+            </div>
+            <div class="tarjeta-resumen">
+                <i class="fas fa-exclamation-triangle"></i>
+                <div>
+                    <h3 id="clientesMora">0</h3>
+                    <p>Clientes en mora</p>
+                </div>
+            </div>
+            <div class="tarjeta-resumen">
+                <i class="fas fa-calendar-week"></i>
+                <div>
+                    <h3 id="pagosEsteMes">0</h3>
+                    <p>Pagos este mes</p>
+                </div>
+            </div>
+            <div class="tarjeta-resumen">
+                <i class="fas fa-dollar-sign"></i>
+                <div>
+                    <h3 id="totalRecaudado">$0</h3>
+                    <p>Recaudado este mes</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filtros -->
+        <div class="filtros-pagos">
+            <div class="buscador-pagos">
+                <i class="fas fa-search"></i>
+                <input type="text" id="buscadorPagos" placeholder="Buscar cliente...">
+            </div>
+            <div class="filtro-estado">
+                <select id="filtroEstado">
+                    <option value="todos">📋 Todos los clientes</option>
+                    <option value="aldia">✅ Al día</option>
+                    <option value="mora">⚠️ En mora</option>
+                    <option value="pagohoy">📅 Pagaron hoy</option>
+                    <option value="esteMes">📆 Pagaron este mes</option>
+                </select>
+            </div>
+            <div class="filtro-mes">
+                <input type="month" id="filtroMes">
+            </div>
+            <button class="btn-secundario" id="btnExportarPagos">
+                <i class="fas fa-download"></i> Exportar
+            </button>
+        </div>
+
+        <!-- Tabla de control de pagos -->
+        <div class="tabla-pagos-container">
+            <table class="tabla-pagos" id="tablaPagos">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Cliente</th>
+                        <th>Teléfono</th>
+                        <th>Plan</th>
+                        <th>Monto</th>
+                        <th>Último pago</th>
+                        <th>Próximo pago</th>
+                        <th>Estado</th>
+                        <th>Días atraso</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="tablaPagosBody">
+                    <tr class="sin-registros">
+                        <td colspan="10">
+                            <div class="sin-pagos">
+                                <i class="fas fa-credit-card"></i>
+                                <p>No hay clientes registrados aún</p>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Navegación rápida -->
+        <div class="nav-rapida">
+            <a href="../tecnico/alta-cliente.html" class="btn-outline">
+                <i class="fas fa-user-plus"></i> Nuevo Cliente
+            </a>
+            <a href="../tecnico/lista-clientes.html" class="btn-outline">
+                <i class="fas fa-list"></i> Ver Clientes
+            </a>
+        </div>
+    </div>
+
+    <!-- Modal para registrar pago -->
+    <div id="modalPago" class="modal-pago">
+        <div class="modal-contenido">
+            <div class="modal-header">
+                <h3><i class="fas fa-money-bill-wave"></i> Registrar Pago</h3>
+                <span class="modal-close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="cliente-info" id="modalClienteInfo"></div>
+                <form id="formRegistroPago">
+                    <div class="campo-pago">
+                        <label>Fecha de pago *</label>
+                        <input type="date" id="fechaPago" required>
+                    </div>
+                    <div class="campo-pago">
+                        <label>Monto pagado *</label>
+                        <input type="number" id="montoPago" step="0.01" required placeholder="$">
+                    </div>
+                    <div class="campo-pago">
+                        <label>Método de pago</label>
+                        <select id="metodoPago">
+                            <option value="efectivo">💵 Efectivo</option>
+                            <option value="transferencia">🏦 Transferencia</option>
+                            <option value="oxxo">🏪 OXXO</option>
+                            <option value="tarjeta">💳 Tarjeta</option>
+                        </select>
+                    </div>
+                    <div class="campo-pago">
+                        <label>Referencia (opcional)</label>
+                        <input type="text" id="referenciaPago" placeholder="Número de operación, folio...">
+                    </div>
+                    <div class="campo-pago">
+                        <label>Notas</label>
+                        <textarea id="notasPago" rows="2" placeholder="Observaciones..."></textarea>
+                    </div>
+                    <button type="submit" class="btn-primario btn-full">
+                        <i class="fas fa-save"></i> Registrar Pago
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="../js/control-pagos.js"></script>
+</body>
+</html>

@@ -1,0 +1,22 @@
+# Archivos del sistema
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
+
+# Archivos temporales
+*.log
+*.tmp
+
+# Datos locales (NO subir datos de clientes)
+*.json
+!package.json
+
+# Dependencias (si usas npm después)
+node_modules/
+
+# Variables de entorno (si usas API después)
+.env
+.env.local
