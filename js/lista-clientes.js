@@ -72,12 +72,22 @@ function actualizarContador() {
 }
 
 function getPlanBadge(plan) {
+    // Normalizar el plan (minúsculas y sin espacios)
+    const planNormalizado = String(plan || '').toLowerCase().trim();
+    
     const planes = {
         'navega': { clase: 'plan-navega', texto: 'NAVEGA 20MBPS' },
         'vuelo': { clase: 'plan-vuelo', texto: 'VUELO 30MBPS' },
         'elite': { clase: 'plan-elite', texto: 'ELITE 40MBPS' }
     };
-    const p = planes[plan] || planes.navega;
+    
+    const p = planes[planNormalizado];
+    
+    if (!p) {
+        console.warn('Plan no reconocido:', plan, 'Normalizado:', planNormalizado);
+        return `<span class="plan-badge" style="background:#f1f5f9; color:#5f6b7a;">${plan || 'SIN PLAN'}</span>`;
+    }
+    
     return `<span class="plan-badge ${p.clase}">${p.texto}</span>`;
 }
 
