@@ -287,3 +287,20 @@ body {
         font-size: 24px;
     }
 }
+
+/* FORZAR BADGE DENTRO DE LA CELDA */
+.tabla-clientes td .plan-badge {
+    display: inline-block !important;
+    position: relative !important;
+    top: 0 !important;
+    left: 0 !important;
+    margin: 0 !important;
+    float: none !important;
+    transform: none !important;
+    white-space: nowrap !important;
+    vertical-align: middle !important;
+}
+
+.tabla-clientes td {
+    vertical-align: middle !important;
+}
