@@ -242,14 +242,26 @@ function actualizarResumen() {
     
     const mesActual = new Date().toISOString().slice(0,7);
     const pagosEsteMes = pagosGlobal.filter(p => p.fecha.startsWith(mesActual));
-    totalRecaudado = pagosEsteMes.reduce((sum, p) => sum + p.monto, 0);
+    
+    // FORZAR A NÚMERO Y ELIMINAR CEROS A LA IZQUIERDA
+    totalRecaudado = pagosEsteMes.reduce((sum, p) => {
+        let monto = Number(p.monto);
+        if (isNaN(monto)) monto = 0;
+        return sum + monto;
+    }, 0);
     
     document.getElementById('totalClientes').textContent = total;
     document.getElementById('clientesAlDia').textContent = aldia;
     document.getElementById('clientesMora').textContent = mora;
     document.getElementById('pagosEsteMes').textContent = pagosEsteMes.length;
-    document.getElementById('totalRecaudado').textContent = `$${totalRecaudado.toLocaleString()}`;
+    
+    // Formato sin cero a la izquierda
+    document.getElementById('totalRecaudado').textContent = `$${totalRecaudado.toFixed(2)}`;
 }
+
+// ========================================
+// REGISTRAR PAGO VÍA API
+// ========================================
 
 // ========================================
 // REGISTRAR PAGO VÍA API
