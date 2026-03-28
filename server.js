@@ -42,19 +42,19 @@ app.get('/api/clientes/:id', async (req, res) => {
 app.post('/api/clientes', async (req, res) => {
   const { nombre, telefono1, telefono2, colonia, direccion, lat, lng, 
           plan, ip, mac, marcaModem, modeloModem, serialModem, 
-          fechaInstalacion, observaciones, tecnico, foto } = req.body;
+          fechaInstalacion, observaciones, tecnico, foto, dia_pago } = req.body;
   
   try {
     const result = await pool.query(
       `INSERT INTO clientes 
        (nombre, telefono1, telefono2, colonia, direccion, lat, lng, 
         plan, ip, mac, marca_modem, modelo_modem, serial_modem, 
-        fecha_instalacion, observaciones, tecnico, foto) 
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17) 
+        fecha_instalacion, observaciones, tecnico, foto, dia_pago) 
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18) 
        RETURNING *`,
       [nombre, telefono1, telefono2, colonia, direccion, lat, lng, 
        plan, ip, mac, marcaModem, modeloModem, serialModem, 
-       fechaInstalacion, observaciones, tecnico, foto]
+       fechaInstalacion, observaciones, tecnico, foto, dia_pago || 15]
     );
     res.json(result.rows[0]);
   } catch (err) {

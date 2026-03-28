@@ -183,7 +183,8 @@ function procesarJSON(json) {
         marca_modem: row.marca_modem || row.Marca || '',
         modelo_modem: row.modelo_modem || row.Modelo || '',
         serial_modem: row.serial_modem || row.Serial || '',
-        tecnico_nombre: row.tecnico_nombre || row.Tecnico || ''
+        tecnico_nombre: row.tecnico_nombre || row.Tecnico || '',
+        dia_pago: row.dia_pago || 15   // ← NUEVA LÍNEA
     }));
     validarClientes(clientes);
 }
@@ -225,20 +226,21 @@ btnConfirmarImportar?.addEventListener('click', async () => {
             const res = await fetch(`${API_URL}/clientes`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    nombre: c.nombre,
-                    telefono1: c.telefono1,
-                    telefono2: c.telefono2 || '',
-                    colonia: c.colonia,
-                    direccion: c.direccion,
-                    plan: c.plan,
-                    ip: c.ip || '',
-                    mac: c.mac || '',
-                    marca_modem: c.marca_modem || '',
-                    modelo_modem: c.modelo_modem || '',
-                    serial_modem: c.serial_modem || '',
-                    tecnico_nombre: c.tecnico_nombre || ''
-                })
+              body: JSON.stringify({
+    nombre: c.nombre,
+    telefono1: c.telefono1,
+    telefono2: c.telefono2 || '',
+    colonia: c.colonia,
+    direccion: c.direccion,
+    plan: c.plan,
+    ip: c.ip || '',
+    mac: c.mac || '',
+    marca_modem: c.marca_modem || '',
+    modelo_modem: c.modelo_modem || '',
+    serial_modem: c.serial_modem || '',
+    tecnico_nombre: c.tecnico_nombre || '',
+    dia_pago: c.dia_pago || 15   // ← NUEVA LÍNEA
+})
             });
             if (res.ok) importados++; else errores++;
         } catch (e) { errores++; }
