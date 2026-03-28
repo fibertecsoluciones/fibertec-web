@@ -1,93 +1,71 @@
 // ========================================
-// LISTA DE CLIENTES - CON API (PostgreSQL)
+// LISTA DE CLIENTES - VERSIÓN TABLA
 // ========================================
 
-const API_URL = '/api';
-
+const API_URL = window.location.origin + '/api';
 let clientesGlobal = [];
 
 async function cargarClientes() {
     try {
         const response = await fetch(`${API_URL}/clientes`);
-        const clientes = await response.json();
-        clientesGlobal = clientes;
+        if (!response.ok) throw new Error('Error al cargar clientes');
+        clientesGlobal = await response.json();
         actualizarTabla();
-        actualizarContador();
     } catch (error) {
-        console.error('Error al cargar clientes:', error);
-        mostrarError();
+        console.error('Error:', error);
+        document.getElementById('tablaClientesBody').innerHTML = `
+            <tr class="sin-registros"><td colspan="11">
+                <div class="sin-clientes"><i class="fas fa-database"></i><p>Error al cargar clientes</p></div>
+            </td></tr>
+        `;
     }
 }
 
 function actualizarTabla() {
     const tbody = document.getElementById('tablaClientesBody');
-    const buscador = document.getElementById('buscadorTabla').value.toLowerCase();
+    const totalSpan = document.getElementById('totalClientes');
+    const busqueda = document.getElementById('buscadorTabla')?.value.toLowerCase() || '';
     
-    let clientesFiltrados = clientesGlobal;
-    
-    if (buscador) {
-        clientesFiltrados = clientesGlobal.filter(c => 
-            c.nombre?.toLowerCase().includes(buscador) ||
-            c.telefono1?.includes(buscador) ||
-            c.colonia?.toLowerCase().includes(buscador) ||
-            c.ip?.includes(buscador) ||
-            c.mac?.toLowerCase().includes(buscador)
+    let filtrados = clientesGlobal;
+    if (busqueda) {
+        filtrados = clientesGlobal.filter(c => 
+            (c.nombre || '').toLowerCase().includes(busqueda) ||
+            (c.telefono1 || '').includes(busqueda) ||
+            (c.colonia || '').toLowerCase().includes(busqueda)
         );
     }
     
-    if (clientesFiltrados.length === 0) {
-        tbody.innerHTML = `
-            <tr class="sin-registros">
-                <td colspan="11">
-                    <div class="sin-clientes">
-                        <i class="fas fa-database"></i>
-                        <p>No hay clientes registrados aún</p>
-                    </div>
-                 </td>
-             </tr>
-        `;
+    totalSpan.textContent = filtrados.length;
+    
+    if (filtrados.length === 0) {
+        tbody.innerHTML = `<tr class="sin-registros"><td colspan="11"><div class="sin-clientes"><i class="fas fa-database"></i><p>No hay clientes registrados</p></div></td></tr>`;
         return;
     }
     
-    tbody.innerHTML = clientesFiltrados.map(cliente => `
+    tbody.innerHTML = filtrados.map(c => `
         <tr>
-            <td><span class="cliente-id">#${cliente.id}</span></td>
-            <td><span class="cliente-nombre">${escapeHtml(cliente.nombre)}</span></td>
-            <td>${cliente.telefono1} ${cliente.telefono2 ? ' / ' + cliente.telefono2 : ''}</td>
-            <td>${escapeHtml(cliente.colonia)}</td>
-            <td>${getPlanBadge(cliente.plan)}</td>
-            <td><span class="cliente-ip">${cliente.ip || 'N/A'}</span></td>
-            <td><span class="cliente-mac">${cliente.mac || 'N/A'}</span></td>
-            <td>${cliente.marca_modem || ''} ${cliente.modelo_modem || ''}</td>
-            <td>${escapeHtml(cliente.tecnico || 'N/A')}</td>
-            <td>${cliente.fecha_instalacion || cliente.fecha_registro?.split('T')[0] || 'N/A'}</td>
-            <td>${cliente.foto ? `<img src="${cliente.foto}" class="foto-miniatura" alt="Módem" onclick="verFoto('${cliente.id}')">` : 'Sin foto'}</td>
+            <td>${c.id || ''}</td>
+            <td class="cliente-nombre">${escapeHtml(c.nombre)}</td>
+            <td>${c.telefono1 || ''} ${c.telefono2 ? '/' + c.telefono2 : ''}</td>
+            <td>${escapeHtml(c.colonia)}</td>
+            <td>${getPlanBadge(c.plan)}</td>
+            <td><span class="cliente-ip">${c.ip || 'N/A'}</span></td>
+            <td><span class="cliente-mac">${c.mac || 'N/A'}</span></td>
+            <td>${c.marca_modem || ''} ${c.modelo_modem || ''}</td>
+            <td>${escapeHtml(c.tecnico_nombre || c.tecnico || 'N/A')}</td>
+            <td>${c.fecha_instalacion || '-'}</td>
+            <td>${c.foto ? `<img src="${c.foto}" class="foto-miniatura" onclick="verFoto('${c.id}')">` : '-'}</td>
         </tr>
     `).join('');
 }
 
-function actualizarContador() {
-    const total = clientesGlobal.length;
-    document.getElementById('totalClientes').textContent = total;
-}
-
 function getPlanBadge(plan) {
-    // Normalizar el plan (minúsculas y sin espacios)
-    const planNormalizado = String(plan || '').toLowerCase().trim();
-    
     const planes = {
-        'navega': { clase: 'plan-navega', texto: 'NAVEGA 20MBPS' },
-        'vuelo': { clase: 'plan-vuelo', texto: 'VUELO 30MBPS' },
-        'elite': { clase: 'plan-elite', texto: 'ELITE 40MBPS' }
+        navega: { clase: 'plan-navega', texto: 'NAVEGA 20MBPS' },
+        vuelo: { clase: 'plan-vuelo', texto: 'VUELO 30MBPS' },
+        elite: { clase: 'plan-elite', texto: 'ELITE 40MBPS' }
     };
-    
-    const p = planes[planNormalizado];
-    
-    if (!p) {
-        console.warn('Plan no reconocido:', plan, 'Normalizado:', planNormalizado);
-        return `<span class="plan-badge" style="background:#f1f5f9; color:#5f6b7a;">${plan || 'SIN PLAN'}</span>`;
-    }
-    
+    const p = planes[plan] || planes.navega;
     return `<span class="plan-badge ${p.clase}">${p.texto}</span>`;
 }
 
@@ -98,51 +76,205 @@ function escapeHtml(text) {
     return div.innerHTML;
 }
 
-function verFoto(id) {
+window.verFoto = (id) => {
     const cliente = clientesGlobal.find(c => c.id == id);
     if (cliente && cliente.foto) {
         const ventana = window.open();
         ventana.document.write(`
-            <html>
-            <head><title>Foto del módem - ${cliente.nombre}</title></head>
-            <body style="display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; background: #1a2a4f;">
-                <img src="${cliente.foto}" style="max-width: 90vw; max-height: 90vh; border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.3);">
-            </body>
-            </html>
+            <html><head><title>Foto - ${cliente.nombre}</title></head>
+            <body style="display:flex;justify-content:center;align-items:center;min-height:100vh;margin:0;background:#1a2a4f;">
+                <img src="${cliente.foto}" style="max-width:90vw;max-height:90vh;border-radius:10px;">
+            </body></html>
         `);
+    }
+};
+
+// Exportar datos
+document.getElementById('btnExportar')?.addEventListener('click', () => {
+    const dataStr = JSON.stringify(clientesGlobal, null, 2);
+    const blob = new Blob([dataStr], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `clientes_fibertec_${new Date().toISOString().split('T')[0]}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+});
+
+// Buscador en tiempo real
+document.getElementById('buscadorTabla')?.addEventListener('input', actualizarTabla);
+
+// ========================================
+// IMPORTAR CLIENTES DESDE EXCEL
+// ========================================
+
+const modal = document.getElementById('modalImportar');
+const closeModal = document.getElementById('closeModal');
+const areaImportar = document.getElementById('areaImportar');
+const archivoInput = document.getElementById('archivoExcel');
+const previewContainer = document.getElementById('previewContainer');
+const previewBody = document.getElementById('previewBody');
+const btnCancelarImportar = document.getElementById('btnCancelarImportar');
+const btnConfirmarImportar = document.getElementById('btnConfirmarImportar');
+const resultadoDiv = document.getElementById('resultadoImportacion');
+
+let datosClientes = [];
+
+document.getElementById('btnImportarClientes')?.addEventListener('click', () => modal?.classList.add('active'));
+closeModal?.addEventListener('click', () => { modal?.classList.remove('active'); resetModal(); });
+modal?.addEventListener('click', (e) => { if (e.target === modal) { modal.classList.remove('active'); resetModal(); } });
+
+areaImportar?.addEventListener('click', () => archivoInput.click());
+areaImportar?.addEventListener('dragover', (e) => { e.preventDefault(); areaImportar.style.borderColor = '#3ea682'; });
+areaImportar?.addEventListener('dragleave', () => areaImportar.style.borderColor = '#e2e8f0');
+areaImportar?.addEventListener('drop', (e) => {
+    e.preventDefault();
+    areaImportar.style.borderColor = '#e2e8f0';
+    const file = e.dataTransfer.files[0];
+    if (file) procesarArchivo(file);
+});
+
+archivoInput?.addEventListener('change', (e) => { if (e.target.files[0]) procesarArchivo(e.target.files[0]); });
+
+function procesarArchivo(file) {
+    const ext = file.name.split('.').pop().toLowerCase();
+    if (ext === 'csv') {
+        const reader = new FileReader();
+        reader.onload = (e) => procesarCSV(e.target.result);
+        reader.readAsText(file, 'UTF-8');
+    } else if (ext === 'xlsx' || ext === 'xls') {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const data = new Uint8Array(e.target.result);
+            const workbook = XLSX.read(data, { type: 'array' });
+            const sheet = workbook.Sheets[workbook.SheetNames[0]];
+            const json = XLSX.utils.sheet_to_json(sheet);
+            procesarJSON(json);
+        };
+        reader.readAsArrayBuffer(file);
+    } else {
+        mostrarResultado('error', 'Formato no soportado. Usa CSV o Excel.');
     }
 }
 
-function mostrarError() {
-    const tbody = document.getElementById('tablaClientesBody');
-    tbody.innerHTML = `
-        <tr class="sin-registros">
-            <td colspan="11">
-                <div class="sin-clientes">
-                    <i class="fas fa-exclamation-triangle"></i>
-                    <p>Error al cargar clientes. Verifica la conexión con el servidor.</p>
-                </div>
-            </td>
-        </tr>
-    `;
+function procesarCSV(text) {
+    const lineas = text.split('\n');
+    const encabezados = lineas[0].split(',').map(h => h.trim().toLowerCase());
+    const clientes = [];
+    for (let i = 1; i < lineas.length; i++) {
+        if (!lineas[i].trim()) continue;
+        const valores = lineas[i].split(',');
+        const cliente = {};
+        encabezados.forEach((h, idx) => cliente[h] = valores[idx]?.trim() || '');
+        clientes.push(cliente);
+    }
+    validarClientes(clientes);
 }
 
-// Eventos
-document.addEventListener('DOMContentLoaded', function() {
-    cargarClientes();
-    
-    document.getElementById('buscadorTabla').addEventListener('input', () => {
-        actualizarTabla();
-    });
-    
-    document.getElementById('btnExportar').addEventListener('click', () => {
-        const dataStr = JSON.stringify(clientesGlobal, null, 2);
-        const blob = new Blob([dataStr], {type: 'application/json'});
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `fibertec_clientes_${new Date().toISOString().split('T')[0]}.json`;
-        a.click();
-        URL.revokeObjectURL(url);
-    });
+function procesarJSON(json) {
+    const clientes = json.map(row => ({
+        nombre: row.nombre || row.Nombre || '',
+        telefono1: row.telefono1 || row.Telefono1 || '',
+        colonia: row.colonia || row.Colonia || '',
+        direccion: row.direccion || row.Direccion || '',
+        plan: (row.plan || row.Plan || '').toLowerCase(),
+        ip: row.ip || row.IP || '',
+        mac: row.mac || row.MAC || '',
+        marca_modem: row.marca_modem || row.Marca || '',
+        modelo_modem: row.modelo_modem || row.Modelo || '',
+        serial_modem: row.serial_modem || row.Serial || '',
+        tecnico_nombre: row.tecnico_nombre || row.Tecnico || ''
+    }));
+    validarClientes(clientes);
+}
+
+function validarClientes(clientes) {
+    datosClientes = [];
+    previewBody.innerHTML = '';
+    for (const c of clientes) {
+        let estado = { tipo: 'nuevo', mensaje: '✅ Válido' };
+        if (!c.nombre) estado = { tipo: 'error', mensaje: '❌ Falta nombre' };
+        else if (!c.telefono1) estado = { tipo: 'error', mensaje: '❌ Falta teléfono' };
+        else if (!c.colonia) estado = { tipo: 'error', mensaje: '❌ Falta colonia' };
+        else if (!c.direccion) estado = { tipo: 'error', mensaje: '❌ Falta dirección' };
+        else if (!c.plan || !['navega', 'vuelo', 'elite'].includes(c.plan)) estado = { tipo: 'error', mensaje: '❌ Plan inválido' };
+        
+        datosClientes.push({ ...c, estado });
+        const row = previewBody.insertRow();
+        row.insertCell(0).textContent = c.nombre;
+        row.insertCell(1).textContent = c.telefono1;
+        row.insertCell(2).textContent = c.colonia;
+        row.insertCell(3).textContent = c.plan;
+        const estadoCell = row.insertCell(4);
+        estadoCell.textContent = estado.mensaje;
+        estadoCell.className = `estado-${estado.tipo}`;
+    }
+    if (previewContainer) previewContainer.style.display = 'block';
+}
+
+btnConfirmarImportar?.addEventListener('click', async () => {
+    const nuevos = datosClientes.filter(c => c.estado.tipo === 'nuevo');
+    if (nuevos.length === 0) {
+        mostrarResultado('error', 'No hay clientes válidos para importar');
+        return;
+    }
+    mostrarResultado('exito', `Importando ${nuevos.length} clientes...`);
+    let importados = 0, errores = 0;
+    for (const c of nuevos) {
+        try {
+            const res = await fetch(`${API_URL}/clientes`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    nombre: c.nombre,
+                    telefono1: c.telefono1,
+                    telefono2: c.telefono2 || '',
+                    colonia: c.colonia,
+                    direccion: c.direccion,
+                    plan: c.plan,
+                    ip: c.ip || '',
+                    mac: c.mac || '',
+                    marca_modem: c.marca_modem || '',
+                    modelo_modem: c.modelo_modem || '',
+                    serial_modem: c.serial_modem || '',
+                    tecnico_nombre: c.tecnico_nombre || ''
+                })
+            });
+            if (res.ok) importados++; else errores++;
+        } catch (e) { errores++; }
+    }
+    mostrarResultado('exito', `✅ Importación completada\n📊 Importados: ${importados}\n❌ Errores: ${errores}\n🔄 Recargando página...`);
+    setTimeout(() => location.reload(), 3000);
 });
+
+btnCancelarImportar?.addEventListener('click', resetModal);
+
+function resetModal() {
+    if (previewContainer) previewContainer.style.display = 'none';
+    if (resultadoDiv) resultadoDiv.style.display = 'none';
+    if (archivoInput) archivoInput.value = '';
+    datosClientes = [];
+}
+
+function mostrarResultado(tipo, mensaje) {
+    if (!resultadoDiv) return;
+    resultadoDiv.className = `resultado-importacion ${tipo}`;
+    resultadoDiv.innerHTML = mensaje.replace(/\n/g, '<br>');
+    resultadoDiv.style.display = 'block';
+}
+
+// Descargar plantilla
+document.getElementById('descargarPlantilla')?.addEventListener('click', (e) => {
+    e.preventDefault();
+    const plantilla = [
+        ['nombre', 'telefono1', 'telefono2', 'colonia', 'direccion', 'plan', 'ip', 'mac', 'marca_modem', 'modelo_modem', 'serial_modem', 'tecnico_nombre'],
+        ['Juan Pérez', '9211509583', '', 'Popotla', 'Calle Principal #123', 'navega', '192.168.1.100', 'AA:BB:CC:DD:EE:FF', 'Huawei', 'HG8145V5', 'ABC123', 'Carlos López']
+    ];
+    const ws = XLSX.utils.aoa_to_sheet(plantilla);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Clientes');
+    XLSX.writeFile(wb, 'plantilla_clientes_fibertec.xlsx');
+});
+
+// Inicializar
+cargarClientes();

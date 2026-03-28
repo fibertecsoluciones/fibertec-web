@@ -66,12 +66,64 @@
             <a href="alta-cliente.html" class="btn-primario">
                 <i class="fas fa-plus"></i> Nuevo Cliente
             </a>
+            <button type="button" class="btn-secundario" id="btnImportarClientes">
+                <i class="fas fa-upload"></i> Importar Clientes
+            </button>
             <button type="button" class="btn-secundario" id="btnExportar">
                 <i class="fas fa-download"></i> Exportar
             </button>
         </div>
     </div>
 
+    <!-- MODAL PARA IMPORTAR CLIENTES -->
+    <div id="modalImportar" class="modal-importar">
+        <div class="modal-importar-contenido">
+            <div class="modal-header">
+                <h3><i class="fas fa-file-excel"></i> Importar Clientes desde Excel</h3>
+                <span class="modal-close" id="closeModal">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="importar-info">
+                    <i class="fas fa-info-circle"></i>
+                    <div>
+                        <h4>Formato requerido</h4>
+                        <p>Columnas: nombre, telefono1, colonia, direccion, plan, ip, mac, marca_modem, modelo_modem, serial_modem, tecnico_nombre</p>
+                        <p>Plan: <strong>navega</strong> (20MBPS) | <strong>vuelo</strong> (30MBPS) | <strong>elite</strong> (40MBPS)</p>
+                        <a href="#" id="descargarPlantilla" class="btn-link">📥 Descargar plantilla de ejemplo</a>
+                    </div>
+                </div>
+
+                <div class="area-importar" id="areaImportar">
+                    <i class="fas fa-cloud-upload-alt"></i>
+                    <p>Arrastra tu archivo Excel/CSV aquí</p>
+                    <p class="small">o haz clic para seleccionar</p>
+                    <input type="file" id="archivoExcel" accept=".csv, .xlsx, .xls">
+                </div>
+
+                <div id="previewContainer" style="display: none;">
+                    <h4>📋 Vista previa</h4>
+                    <div class="tabla-preview">
+                        <table>
+                            <thead>
+                                <tr><th>Nombre</th><th>Teléfono</th><th>Colonia</th><th>Plan</th><th>Estado</th></tr>
+                            </thead>
+                            <tbody id="previewBody"></tbody>
+                        </table>
+                    </div>
+                    <div class="botones-importar">
+                        <button class="btn-secundario" id="btnCancelarImportar">Cancelar</button>
+                        <button class="btn-primario" id="btnConfirmarImportar">
+                            <i class="fas fa-upload"></i> Importar
+                        </button>
+                    </div>
+                </div>
+
+                <div id="resultadoImportacion" class="resultado-importacion"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="../js/lista-clientes.js"></script>
 </body>
 </html>
