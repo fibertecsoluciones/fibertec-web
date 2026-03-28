@@ -48,7 +48,49 @@ body {
     opacity: 0.9;
 }
 
-/* Controles de tabla */
+/* BOTONES ARRIBA (nueva posición) */
+.botones-accion {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.btn-primario,
+.btn-secundario {
+    padding: 12px 24px;
+    border: none;
+    border-radius: 50px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    text-decoration: none;
+}
+
+.btn-primario {
+    background: linear-gradient(135deg, #3188b2, #3ea682);
+    color: white;
+}
+
+.btn-primario:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(49,136,178,0.3);
+}
+
+.btn-secundario {
+    background: #e2e8f0;
+    color: #2c3e50;
+}
+
+.btn-secundario:hover {
+    background: #cbd5e1;
+}
+
+/* Controles de tabla (buscador y contador) */
 .tabla-controles {
     display: flex;
     justify-content: space-between;
@@ -215,49 +257,6 @@ body {
     font-size: 48px;
     margin-bottom: 15px;
     opacity: 0.5;
-}
-
-/* Botones */
-.botones-form {
-    display: flex;
-    gap: 15px;
-    margin-top: 20px;
-}
-
-.btn-primario,
-.btn-secundario {
-    flex: 1;
-    padding: 14px;
-    border: none;
-    border-radius: 50px;
-    font-size: 16px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.3s;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    text-decoration: none;
-}
-
-.btn-primario {
-    background: linear-gradient(135deg, #3188b2, #3ea682);
-    color: white;
-}
-
-.btn-primario:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(49,136,178,0.3);
-}
-
-.btn-secundario {
-    background: #e2e8f0;
-    color: #2c3e50;
-}
-
-.btn-secundario:hover {
-    background: #cbd5e1;
 }
 
 /* MODAL IMPORTAR CLIENTES */
@@ -428,6 +427,10 @@ body {
 }
 
 @media (max-width: 768px) {
+    .botones-accion {
+        flex-direction: column;
+    }
+    
     .tabla-controles {
         flex-direction: column;
         align-items: stretch;
@@ -437,15 +440,10 @@ body {
         width: 100%;
     }
     
-    .botones-form {
-        flex-direction: column;
-    }
-    
     .header-tecnico h1 {
         font-size: 24px;
     }
 }
-
 
 /* FORZAR BADGE DENTRO DE LA CELDA */
 .tabla-clientes td .plan-badge {
