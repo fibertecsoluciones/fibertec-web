@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FiberTec - Administrar Usuarios</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="../css/main.css">
+</head>
+<body>
+    <div class="container-usuarios">
+        <header class="header-usuarios">
+            <div class="logo-usuarios">
+                <i class="fas fa-users-cog"></i>
+                <span>Fiber<span>Tec</span></span>
+                <span class="badge-admin">ADMIN</span>
+            </div>
+            <h1>👥 Administrar Usuarios</h1>
+            <p>Gestiona técnicos y administradores del sistema</p>
+        </header>
+
+        <div class="botones-accion">
+            <button class="btn-primario" id="btnNuevoUsuario">
+                <i class="fas fa-user-plus"></i> Nuevo Usuario
+            </button>
+            <a href="control-pagos.html" class="btn-secundario">
+                <i class="fas fa-arrow-left"></i> Volver a Pagos
+            </a>
+        </div>
+
+        <div class="tabla-usuarios-container">
+            <table class="tabla-usuarios" id="tablaUsuarios">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Nombre</th>
+                        <th>Email</th>
+                        <th>Rol</th>
+                        <th>Estado</th>
+                        <th>Fecha Registro</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="tablaUsuariosBody">
+                    <tr class="sin-registros">
+                        <td colspan="7">
+                            <div class="sin-usuarios">
+                                <i class="fas fa-spinner fa-spin"></i>
+                                <p>Cargando usuarios...</p>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- MODAL PARA NUEVO/EDITAR USUARIO -->
+    <div id="modalUsuario" class="modal-usuario">
+        <div class="modal-usuario-contenido">
+            <div class="modal-header">
+                <h3 id="modalTitulo"><i class="fas fa-user-plus"></i> Nuevo Usuario</h3>
+                <span class="modal-close" id="closeModal">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form id="formUsuario">
+                    <input type="hidden" id="usuarioId">
+                    
+                    <div class="campo">
+                        <label>Nombre completo *</label>
+                        <input type="text" id="nombre" required placeholder="Ej: Carlos López">
+                    </div>
+                    
+                    <div class="campo">
+                        <label>Email *</label>
+                        <input type="email" id="email" required placeholder="ejemplo@fibertec.mx">
+                    </div>
+                    
+                    <div class="campo">
+                        <label>Contraseña <span id="passwordRequerido">*</span></label>
+                        <input type="password" id="password" placeholder="Mínimo 6 caracteres">
+                        <small class="ayuda">Mínimo 6 caracteres. Dejar en blanco para mantener la actual.</small>
+                    </div>
+                    
+                    <div class="campo">
+                        <label>Rol *</label>
+                        <select id="rol" required>
+                            <option value="tecnico">👨‍🔧 Técnico</option>
+                            <option value="admin">👑 Administrador</option>
+                        </select>
+                    </div>
+                    
+                    <div class="campo">
+                        <label>Estado</label>
+                        <select id="activo">
+                            <option value="true">✅ Activo</option>
+                            <option value="false">❌ Inactivo</option>
+                        </select>
+                    </div>
+                    
+                    <div class="botones-form">
+                        <button type="button" class="btn-secundario" id="btnCancelarModal">Cancelar</button>
+                        <button type="submit" class="btn-primario">
+                            <i class="fas fa-save"></i> Guardar Usuario
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="../js/usuarios.js"></script>
+</body>
+</html>
