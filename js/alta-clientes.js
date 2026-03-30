@@ -2,7 +2,7 @@
 // ALTA DE CLIENTE - CON API (PostgreSQL)
 // ========================================
 
-const API_URL = '/api'; // Railway lo resuelve solo
+//const API_URL = '/api'; // Railway lo resuelve solo
 
 document.addEventListener('DOMContentLoaded', function() {
     const form = document.getElementById('formAltaCliente');

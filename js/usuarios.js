@@ -2,7 +2,7 @@
 // ADMINISTRAR USUARIOS - FIBERTEC
 // ========================================
 
-const API_URL = '/api';
+//const API_URL = '/api';
 
 let usuariosGlobal = [];
 

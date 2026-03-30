@@ -2,7 +2,7 @@
 // LISTA DE CLIENTES - VERSIÓN TABLA
 // ========================================
 
-const API_URL = window.location.origin + '/api';
+//const API_URL = window.location.origin + '/api';
 let clientesGlobal = [];
 
 async function cargarClientes() {
