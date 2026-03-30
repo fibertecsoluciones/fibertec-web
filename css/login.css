@@ -152,3 +152,10 @@ body {
         transform: translateY(0);
     }
 }
+
+.logo-img {
+    height: 60px;
+    width: auto;
+    display: block;
+    margin: 0 auto;
+}
