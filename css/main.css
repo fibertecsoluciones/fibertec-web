@@ -11,6 +11,8 @@
 /* Layout */
 @import 'layout.css';
 
+
+@import 'login.css';
 /* Componentes */
 @import 'components/buttons.css';
 @import 'components/navbar.css';
@@ -38,7 +40,7 @@
 @import 'pages/lista-clientes.css';
 @import 'pages/control-pagos.css';
 @import 'pages/usuarios.css';
-@import 'login.css';
+
 
   /* ← NUEVA LÍNEA */
 
