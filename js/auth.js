@@ -1,27 +1,23 @@
-// ========================================
-// AUTENTICACIÓN - FIBERTEC
-// ========================================
-
 const API_URL = '/api';
 
 document.getElementById('loginForm').addEventListener('submit', async (e) => {
     e.preventDefault();
     
-    const email = document.getElementById('email').value;
+    const username = document.getElementById('username').value;
     const password = document.getElementById('password').value;
     const errorDiv = document.getElementById('errorMensaje');
-    const btnSubmit = document.querySelector('.btn-login');
-    const textoOriginal = btnSubmit.innerHTML;
+    const btn = document.querySelector('.btn-login');
+    const originalText = btn.innerHTML;
     
-    btnSubmit.disabled = true;
-    btnSubmit.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Ingresando...';
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Ingresando...';
     errorDiv.classList.remove('show');
     
     try {
         const response = await fetch(`${API_URL}/login`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email, password })
+            body: JSON.stringify({ username, password })
         });
         
         const data = await response.json();
@@ -32,7 +28,7 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
             if (data.user.rol === 'admin') {
                 window.location.href = '/admin/control-pagos.html';
             } else {
-                 window.location.href = '/tecnico/alta-cliente.html'; 
+                window.location.href = '/tecnico/alta-cliente.html';
             }
         } else {
             errorDiv.textContent = data.message || 'Credenciales incorrectas';
@@ -42,7 +38,7 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
         errorDiv.textContent = 'Error al conectar con el servidor';
         errorDiv.classList.add('show');
     } finally {
-        btnSubmit.disabled = false;
-        btnSubmit.innerHTML = textoOriginal;
+        btn.disabled = false;
+        btn.innerHTML = originalText;
     }
 });
