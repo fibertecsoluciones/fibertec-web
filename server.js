@@ -163,20 +163,22 @@ app.get('/api/reportes/pagos/:mes', async (req, res) => {
 // ========================================
 
 app.post('/api/login', async (req, res) => {
-  const { email, password } = req.body;
-  try {
-    const result = await pool.query(
-      'SELECT id, nombre, rol FROM usuarios WHERE email = $1 AND password_hash = crypt($2, password_hash)',
-      [email, password]
-    );
-    if (result.rows.length > 0) {
-      res.json({ success: true, user: result.rows[0] });
-    } else {
-      res.status(401).json({ success: false, message: 'Credenciales incorrectas' });
+    const { email, password } = req.body;
+    try {
+        console.log('Login intento:', email);
+        const result = await pool.query(
+            'SELECT id, nombre, email, rol FROM usuarios WHERE email = $1 AND password_hash = crypt($2, password_hash) AND activo = true',
+            [email, password]
+        );
+        if (result.rows.length > 0) {
+            res.json({ success: true, user: result.rows[0] });
+        } else {
+            res.status(401).json({ success: false, message: 'Credenciales incorrectas' });
+        }
+    } catch (err) {
+        console.error('Error en login:', err.message);
+        res.status(500).json({ success: false, message: err.message });
     }
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
 });
 
 
