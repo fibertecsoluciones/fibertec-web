@@ -190,7 +190,9 @@ window.verHistorialPagos = async function(clienteId) {
         
         let historial = `📋 HISTORIAL DE PAGOS\nCliente: ${cliente.nombre}\n\n`;
         pagos.forEach(p => {
-            historial += `📅 ${p.fecha} | $${p.monto} | ${p.metodo || 'N/A'} | Ref: ${p.referencia || 'N/A'}\n`;
+            
+            const fechaLimpia = formatFecha(p.fecha);
+historial += `📅 ${fechaLimpia} | $${p.monto} | ${p.metodo || 'N/A'} | Ref: ${p.referencia || 'N/A'}\n`;
         });
         
         alert(historial);
