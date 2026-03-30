@@ -114,9 +114,19 @@ function obtenerEstadoPago(cliente) {
 // UTILIDADES
 // ========================================
 
-function obtenerMontoPlan(plan) {
+function obtenerMontoPlan(cliente) {
+    // Buscar el último pago del cliente
+    const pagosCliente = pagosGlobal.filter(p => p.cliente_id === cliente.id);
+    const ultimoPago = pagosCliente.sort((a, b) => new Date(b.fecha) - new Date(a.fecha))[0];
+    
+    // Si tiene pagos, mostrar el monto del último pago
+    if (ultimoPago && ultimoPago.monto) {
+        return ultimoPago.monto;
+    }
+    
+    // Si no tiene pagos, usar el monto por defecto según el plan
     const montos = { navega: 400, vuelo: 500, elite: 600, empresarial: 1000, personalizado: 350 };
-    return montos[plan] || 400;
+    return montos[cliente.plan] || 400;
 }
 
 function getPlanNombre(plan) {
@@ -212,7 +222,7 @@ function actualizarTabla() {
     const clientesConEstado = clientesFiltrados.map(c => ({
         ...c,
         estadoPago: obtenerEstadoPago(c),
-        monto: obtenerMontoPlan(c.plan)
+       monto: obtenerMontoPlan(c)
     }));
     
     let resultado = [...clientesConEstado];
