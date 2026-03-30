@@ -32,7 +32,7 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
             if (data.user.rol === 'admin') {
                 window.location.href = '/admin/control-pagos.html';
             } else {
-                window.location.href = '/tecnico/lista-clientes.html';
+                 window.location.href = '/tecnico/alta-cliente.html'; 
             }
         } else {
             errorDiv.textContent = data.message || 'Credenciales incorrectas';
