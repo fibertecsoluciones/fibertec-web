@@ -1,49 +1,50 @@
-const API_URL = '/api';
+const API_URL = '/api';  // ← Global, disponible para todos los scripts
 
-document.getElementById('loginForm').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    
-    const username = document.getElementById('username').value;
-    const password = document.getElementById('password').value;
-    const errorDiv = document.getElementById('errorMensaje');
-    const btn = document.querySelector('.btn-login');
-    const originalText = btn.innerHTML;
-    
-    btn.disabled = true;
-    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Ingresando...';
-    errorDiv.classList.remove('show');
-    
-    try {
-        const response = await fetch(`${API_URL}/login`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ username, password })
-        });
+if (document.getElementById('loginForm')) {
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
         
-        const data = await response.json();
+        const username = document.getElementById('username').value;
+        const password = document.getElementById('password').value;
+        const errorDiv = document.getElementById('errorMensaje');
+        const btn = document.querySelector('.btn-login');
+        const originalText = btn.innerHTML;
         
-        if (data.success) {
-            sessionStorage.setItem('user', JSON.stringify(data.user));
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Ingresando...';
+        errorDiv.classList.remove('show');
+        
+        try {
+            const response = await fetch(`${API_URL}/login`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, password })
+            });
             
-            if (data.user.rol === 'admin') {
-                window.location.href = '/admin/control-pagos.html';
+            const data = await response.json();
+            
+            if (data.success) {
+                sessionStorage.setItem('user', JSON.stringify(data.user));
+                
+                if (data.user.rol === 'admin') {
+                    window.location.href = '/admin/control-pagos.html';
+                } else {
+                    window.location.href = '/tecnico/alta-cliente.html';
+                }
             } else {
-                window.location.href = '/tecnico/alta-cliente.html';
+                errorDiv.textContent = data.message || 'Credenciales incorrectas';
+                errorDiv.classList.add('show');
             }
-        } else {
-            errorDiv.textContent = data.message || 'Credenciales incorrectas';
+        } catch (error) {
+            errorDiv.textContent = 'Error al conectar con el servidor';
             errorDiv.classList.add('show');
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = originalText;
         }
-    } catch (error) {
-        errorDiv.textContent = 'Error al conectar con el servidor';
-        errorDiv.classList.add('show');
-    } finally {
-        btn.disabled = false;
-        btn.innerHTML = originalText;
-    }
-});
+    });
+}
 
-// Cerrar sesión
 function cerrarSesion() {
     sessionStorage.removeItem('user');
     window.location.href = '/login.html';

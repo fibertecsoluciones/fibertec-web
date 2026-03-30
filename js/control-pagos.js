@@ -13,7 +13,7 @@ let resultadoPaginado = [];
 // CONTROL DE PAGOS - SOLO API (PostgreSQL)
 // ========================================
 
-const API_URL = '/api';
+//const API_URL = '/api';
 
 let clientesGlobal = [];
 let pagosGlobal = [];
