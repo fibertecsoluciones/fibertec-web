@@ -48,30 +48,44 @@ function obtenerEstadoPago(cliente) {
     const ultimoPago = pagosCliente.sort((a, b) => new Date(b.fecha) - new Date(a.fecha))[0];
     
     if (!ultimoPago) {
-        return { 
-            estado: 'mora', 
-            diasAtraso: 30, 
-            ultimoPago: null, 
-            proximoPago: null 
-        };
+        return { estado: 'mora', diasAtraso: 30, ultimoPago: null, proximoPago: null };
     }
     
     const fechaUltimoPago = new Date(ultimoPago.fecha);
     const hoy = new Date();
     const diaPagoCliente = cliente.dia_pago || 15;
     
-    // Calcular próximo pago según día de pago
+    // ========================================
+    // CÁLCULO CORRECTO DEL PRÓXIMO PAGO
+    // ========================================
+    
+    // Crear fecha base para el próximo pago (mismo mes y año del último pago)
     let fechaProximoPago = new Date(fechaUltimoPago);
+    
+    // Establecer el día de pago
     fechaProximoPago.setDate(diaPagoCliente);
     
+    // Si el día de pago ya pasó en el mes del último pago, pasar al siguiente mes
     if (fechaProximoPago <= fechaUltimoPago) {
         fechaProximoPago.setMonth(fechaProximoPago.getMonth() + 1);
+        // Ajustar el día por si el mes siguiente tiene menos días (ej: 31 → 30)
+        if (fechaProximoPago.getDate() !== diaPagoCliente) {
+            fechaProximoPago.setDate(0); // Último día del mes anterior
+        }
     }
     
-    if (fechaProximoPago < hoy) {
+    // Si la fecha calculada es anterior a hoy, avanzar meses hasta que sea >= hoy
+    while (fechaProximoPago < hoy) {
         fechaProximoPago.setMonth(fechaProximoPago.getMonth() + 1);
+        // Ajustar el día si es necesario
+        if (fechaProximoPago.getDate() !== diaPagoCliente) {
+            fechaProximoPago.setDate(0);
+        }
     }
     
+    const proximoPagoStr = fechaProximoPago.toISOString().split('T')[0];
+    
+    // Calcular días desde el último pago
     const diasDesdeUltimoPago = Math.floor((hoy - fechaUltimoPago) / (1000 * 60 * 60 * 24));
     const estaAlDia = diasDesdeUltimoPago <= 30;
     
@@ -79,7 +93,7 @@ function obtenerEstadoPago(cliente) {
         estado: estaAlDia ? 'aldia' : 'mora',
         diasAtraso: estaAlDia ? 0 : diasDesdeUltimoPago - 30,
         ultimoPago: ultimoPago.fecha,
-        proximoPago: fechaProximoPago.toISOString().split('T')[0]
+        proximoPago: proximoPagoStr
     };
 }
 
