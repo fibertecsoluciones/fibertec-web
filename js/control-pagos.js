@@ -5,7 +5,9 @@ function formatFecha(fechaIso) {
 }
 
 
-
+let paginaActual = 1;
+const registrosPorPagina = 10;
+let resultadoPaginado = [];
 
 // ========================================
 // CONTROL DE PAGOS - SOLO API (PostgreSQL)
@@ -214,6 +216,7 @@ function actualizarTabla() {
     
     let clientesFiltrados = [...clientesGlobal];
     
+    // Filtros
     if (buscador) {
         clientesFiltrados = clientesFiltrados.filter(c => 
             (c.nombre || '').toLowerCase().includes(buscador) ||
@@ -224,7 +227,7 @@ function actualizarTabla() {
     const clientesConEstado = clientesFiltrados.map(c => ({
         ...c,
         estadoPago: obtenerEstadoPago(c),
-       monto: obtenerMontoPlan(c)
+        monto: obtenerMontoPlan(c)
     }));
     
     let resultado = [...clientesConEstado];
@@ -251,12 +254,23 @@ function actualizarTabla() {
         );
     }
     
-    if (resultado.length === 0) {
+    // Paginación
+    resultadoPaginado = resultado;
+    const totalPaginas = Math.ceil(resultadoPaginado.length / registrosPorPagina);
+    
+    if (paginaActual > totalPaginas) paginaActual = totalPaginas || 1;
+    
+    const inicio = (paginaActual - 1) * registrosPorPagina;
+    const fin = inicio + registrosPorPagina;
+    const clientesPagina = resultadoPaginado.slice(inicio, fin);
+    
+    if (clientesPagina.length === 0) {
         tbody.innerHTML = `<tr><td colspan="10"><div class="sin-pagos"><i class="fas fa-credit-card"></i><p>No hay clientes que coincidan con la búsqueda</p></div></td></tr>`;
+        actualizarPaginacion(totalPaginas);
         return;
     }
     
-    tbody.innerHTML = resultado.map(cliente => `
+    tbody.innerHTML = clientesPagina.map(cliente => `
         <tr>
             <td><span class="cliente-id">#${cliente.id}</span></td>
             <td class="cliente-nombre">${escapeHtml(cliente.nombre)}</td>
@@ -275,9 +289,36 @@ function actualizarTabla() {
                     <i class="fas fa-history"></i>
                 </button>
             </td>
-        </table>
+        </tr>
     `).join('');
+    
+    actualizarPaginacion(totalPaginas);
 }
+
+function actualizarPaginacion(totalPaginas) {
+    const paginacionDiv = document.getElementById('paginacion');
+    if (!paginacionDiv) return;
+    
+    if (totalPaginas <= 1) {
+        paginacionDiv.innerHTML = '';
+        return;
+    }
+    
+    let html = '<div class="paginacion-botones">';
+    html += `<button class="btn-paginacion" onclick="cambiarPagina(1)" ${paginaActual === 1 ? 'disabled' : ''}>« Primera</button>`;
+    html += `<button class="btn-paginacion" onclick="cambiarPagina(${paginaActual - 1})" ${paginaActual === 1 ? 'disabled' : ''}>‹ Anterior</button>`;
+    html += `<span class="pagina-info">Página ${paginaActual} de ${totalPaginas}</span>`;
+    html += `<button class="btn-paginacion" onclick="cambiarPagina(${paginaActual + 1})" ${paginaActual === totalPaginas ? 'disabled' : ''}>Siguiente ›</button>`;
+    html += `<button class="btn-paginacion" onclick="cambiarPagina(${totalPaginas})" ${paginaActual === totalPaginas ? 'disabled' : ''}>Última »</button>`;
+    html += '</div>';
+    
+    paginacionDiv.innerHTML = html;
+}
+
+window.cambiarPagina = function(pagina) {
+    paginaActual = pagina;
+    actualizarTabla();
+};
 
 // ========================================
 // ACTUALIZAR RESUMEN
