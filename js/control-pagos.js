@@ -39,8 +39,8 @@ async function cargarDatos() {
 // ========================================
 
 function obtenerEstadoPago(cliente) {
-    const pagosCliente = pagosGlobal.filter(p => p.cliente_id === cliente.id);
-    const ultimoPago = pagosCliente.sort((a,b) => new Date(b.fecha) - new Date(a.fecha))[0];
+    const pagosCliente = pagosGlobal.filter(p => p.clienteId === cliente.id);
+    const ultimoPago = pagosCliente.sort((a, b) => new Date(b.fecha) - new Date(a.fecha))[0];
     
     if (!ultimoPago) {
         return { estado: 'mora', diasAtraso: 30, ultimoPago: null, proximoPago: null };
@@ -48,10 +48,26 @@ function obtenerEstadoPago(cliente) {
     
     const fechaUltimoPago = new Date(ultimoPago.fecha);
     const hoy = new Date();
-    const diasDesdeUltimoPago = Math.floor((hoy - fechaUltimoPago) / (1000 * 60 * 60 * 24));
-    const fechaProximoPago = new Date(fechaUltimoPago);
-    fechaProximoPago.setMonth(fechaProximoPago.getMonth() + 1);
+    const diaPagoCliente = cliente.dia_pago || 15; // Si no tiene, usa día 15
     
+    // Calcular el próximo pago según el día de pago del cliente
+    let fechaProximoPago = new Date(fechaUltimoPago);
+    fechaProximoPago.setDate(diaPagoCliente);
+    
+    // Si la fecha calculada es menor o igual a la fecha del último pago, pasar al mes siguiente
+    if (fechaProximoPago <= fechaUltimoPago) {
+        fechaProximoPago.setMonth(fechaProximoPago.getMonth() + 1);
+    }
+    
+    // Si la fecha calculada es anterior a hoy, también avanzar al mes siguiente
+    if (fechaProximoPago < hoy) {
+        fechaProximoPago.setMonth(fechaProximoPago.getMonth() + 1);
+    }
+    
+    // Calcular días desde el último pago
+    const diasDesdeUltimoPago = Math.floor((hoy - fechaUltimoPago) / (1000 * 60 * 60 * 24));
+    
+    // Verificar si está al día (pagó dentro de los últimos 30 días)
     if (diasDesdeUltimoPago <= 30) {
         return {
             estado: 'aldia',
