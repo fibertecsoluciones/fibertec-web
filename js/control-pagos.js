@@ -1,3 +1,12 @@
+// Formatear fecha ISO a YYYY-MM-DD sin zona horaria
+function formatFecha(fechaIso) {
+    if (!fechaIso) return 'Sin pagos';
+    return fechaIso.split('T')[0];
+}
+
+
+
+
 // ========================================
 // CONTROL DE PAGOS - SOLO API (PostgreSQL)
 // ========================================
@@ -51,48 +60,52 @@ function obtenerEstadoPago(cliente) {
         return { estado: 'mora', diasAtraso: 30, ultimoPago: null, proximoPago: null };
     }
     
-    const fechaUltimoPago = new Date(ultimoPago.fecha);
-    const hoy = new Date();
-    const diaPagoCliente = cliente.dia_pago || 15;
-    
-    // ========================================
-    // CÁLCULO CORRECTO DEL PRÓXIMO PAGO
-    // ========================================
-    
-    // Crear fecha base para el próximo pago (mismo mes y año del último pago)
-    let fechaProximoPago = new Date(fechaUltimoPago);
-    
-    // Establecer el día de pago
-    fechaProximoPago.setDate(diaPagoCliente);
-    
-    // Si el día de pago ya pasó en el mes del último pago, pasar al siguiente mes
-    if (fechaProximoPago <= fechaUltimoPago) {
-        fechaProximoPago.setMonth(fechaProximoPago.getMonth() + 1);
-        // Ajustar el día por si el mes siguiente tiene menos días (ej: 31 → 30)
-        if (fechaProximoPago.getDate() !== diaPagoCliente) {
-            fechaProximoPago.setDate(0); // Último día del mes anterior
-        }
+    // Extraer solo año, mes, día (ignorar hora UTC)
+    function toLocalDate(fechaStr) {
+        const [year, month, day] = fechaStr.split('T')[0].split('-');
+        return new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
     }
     
-    // Si la fecha calculada es anterior a hoy, avanzar meses hasta que sea >= hoy
-    while (fechaProximoPago < hoy) {
+    const fechaUltimoPago = toLocalDate(ultimoPago.fecha);
+    const hoy = new Date();
+    hoy.setHours(0, 0, 0, 0); // Normalizar a inicio del día
+    const diaPago = cliente.dia_pago || 15;
+    
+    // ========================================
+    // Calcular próximo pago
+    // ========================================
+    
+    let fechaProximoPago = new Date(fechaUltimoPago);
+    fechaProximoPago.setDate(diaPago);
+    
+    if (fechaProximoPago <= fechaUltimoPago) {
         fechaProximoPago.setMonth(fechaProximoPago.getMonth() + 1);
-        // Ajustar el día si es necesario
-        if (fechaProximoPago.getDate() !== diaPagoCliente) {
+        // Ajustar si el mes no tiene ese día (ej: 31)
+        if (fechaProximoPago.getDate() !== diaPago) {
             fechaProximoPago.setDate(0);
         }
     }
     
-    const proximoPagoStr = fechaProximoPago.toISOString().split('T')[0];
+    // Avanzar meses hasta que sea >= hoy
+    while (fechaProximoPago < hoy) {
+        fechaProximoPago.setMonth(fechaProximoPago.getMonth() + 1);
+        if (fechaProximoPago.getDate() !== diaPago) {
+            fechaProximoPago.setDate(0);
+        }
+    }
+    
+    // Formatear a YYYY-MM-DD sin zona horaria
+    const proximoPagoStr = `${fechaProximoPago.getFullYear()}-${String(fechaProximoPago.getMonth() + 1).padStart(2, '0')}-${String(fechaProximoPago.getDate()).padStart(2, '0')}`;
     
     // Calcular días desde el último pago
-    const diasDesdeUltimoPago = Math.floor((hoy - fechaUltimoPago) / (1000 * 60 * 60 * 24));
+    const diffTime = hoy - fechaUltimoPago;
+    const diasDesdeUltimoPago = Math.floor(diffTime / (1000 * 60 * 60 * 24));
     const estaAlDia = diasDesdeUltimoPago <= 30;
     
     return {
         estado: estaAlDia ? 'aldia' : 'mora',
         diasAtraso: estaAlDia ? 0 : diasDesdeUltimoPago - 30,
-        ultimoPago: ultimoPago.fecha,
+        ultimoPago: ultimoPago.fecha.split('T')[0], // Formato limpio
         proximoPago: proximoPagoStr
     };
 }
@@ -240,7 +253,7 @@ function actualizarTabla() {
             <td><strong>$${cliente.monto}</strong></td>
             <td>${cliente.estadoPago.ultimoPago || 'Sin pagos'}</td>
             <td>${cliente.estadoPago.proximoPago || 'No disponible'}</td>
-            <td>${cliente.estadoPago.estado === 'aldia' ? '<span class="estado-aldia">✅ Al día</span>' : '<span class="estado-mora">⚠️ En mora</span>'}</td>
+            <td>${cliente.estadoPago.estado === 'aldia' ? '<span class="estado-aldia">✅ Al día</span>' : '<span class="estado-mora">⚠️ En Atraso</span>'}</td>
             <td>${cliente.estadoPago.diasAtraso > 0 ? `<span class="dias-atraso">${cliente.estadoPago.diasAtraso} días</span>` : '-'}</td>
             <td>
                 <button class="btn-accion btn-pagar" onclick="abrirModalPago(${cliente.id})" title="Registrar pago">
