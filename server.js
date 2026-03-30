@@ -123,6 +123,17 @@ app.post('/api/pagos', async (req, res) => {
   }
 });
 
+
+// Obtener TODOS los pagos (para el dashboard)
+app.get('/api/pagos', async (req, res) => {
+  try {
+    const result = await pool.query('SELECT * FROM pagos ORDER BY fecha DESC');
+    res.json(result.rows);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // Reporte de pagos por mes
 app.get('/api/reportes/pagos/:mes', async (req, res) => {
   const mes = req.params.mes;

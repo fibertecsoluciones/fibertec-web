@@ -1,5 +1,5 @@
 // ========================================
-// CONTROL DE PAGOS - CON API (PostgreSQL)
+// CONTROL DE PAGOS - SOLO API (PostgreSQL)
 // ========================================
 
 const API_URL = '/api';
@@ -13,24 +13,29 @@ let pagosGlobal = [];
 
 async function cargarDatos() {
     try {
-        // Cargar clientes
-        const resClientes = await fetch(`${API_URL}/clientes`);
-        clientesGlobal = await resClientes.json();
+        // Cargar clientes y pagos en paralelo
+        const [resClientes, resPagos] = await Promise.all([
+            fetch(`${API_URL}/clientes`),
+            fetch(`${API_URL}/pagos`)
+        ]);
         
-        // Cargar todos los pagos (podrías tener un endpoint específico)
-        // Por ahora, cargamos pagos de cada cliente (puede optimizarse después)
-        pagosGlobal = [];
-        for (const cliente of clientesGlobal) {
-            const resPagos = await fetch(`${API_URL}/clientes/${cliente.id}/pagos`);
-            const pagos = await resPagos.json();
-            pagosGlobal.push(...pagos);
-        }
+        if (!resClientes.ok || !resPagos.ok) throw new Error('Error al cargar datos');
+        
+        clientesGlobal = await resClientes.json();
+        pagosGlobal = await resPagos.json();
         
         actualizarTabla();
         actualizarResumen();
     } catch (error) {
         console.error('Error al cargar datos:', error);
-        mostrarError('Error al cargar datos del servidor');
+        document.getElementById('tablaPagosBody').innerHTML = `
+            <tr><td colspan="10">
+                <div class="sin-pagos">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <p>Error al cargar datos del servidor</p>
+                </div>
+            </td></tr>
+        `;
     }
 }
 
@@ -39,50 +44,43 @@ async function cargarDatos() {
 // ========================================
 
 function obtenerEstadoPago(cliente) {
-    const pagosCliente = pagosGlobal.filter(p => p.clienteId === cliente.id);
+    const pagosCliente = pagosGlobal.filter(p => p.cliente_id === cliente.id);
     const ultimoPago = pagosCliente.sort((a, b) => new Date(b.fecha) - new Date(a.fecha))[0];
     
     if (!ultimoPago) {
-        return { estado: 'mora', diasAtraso: 30, ultimoPago: null, proximoPago: null };
+        return { 
+            estado: 'mora', 
+            diasAtraso: 30, 
+            ultimoPago: null, 
+            proximoPago: null 
+        };
     }
     
     const fechaUltimoPago = new Date(ultimoPago.fecha);
     const hoy = new Date();
-    const diaPagoCliente = cliente.dia_pago || 15; // Si no tiene, usa día 15
+    const diaPagoCliente = cliente.dia_pago || 15;
     
-    // Calcular el próximo pago según el día de pago del cliente
+    // Calcular próximo pago según día de pago
     let fechaProximoPago = new Date(fechaUltimoPago);
     fechaProximoPago.setDate(diaPagoCliente);
     
-    // Si la fecha calculada es menor o igual a la fecha del último pago, pasar al mes siguiente
     if (fechaProximoPago <= fechaUltimoPago) {
         fechaProximoPago.setMonth(fechaProximoPago.getMonth() + 1);
     }
     
-    // Si la fecha calculada es anterior a hoy, también avanzar al mes siguiente
     if (fechaProximoPago < hoy) {
         fechaProximoPago.setMonth(fechaProximoPago.getMonth() + 1);
     }
     
-    // Calcular días desde el último pago
     const diasDesdeUltimoPago = Math.floor((hoy - fechaUltimoPago) / (1000 * 60 * 60 * 24));
+    const estaAlDia = diasDesdeUltimoPago <= 30;
     
-    // Verificar si está al día (pagó dentro de los últimos 30 días)
-    if (diasDesdeUltimoPago <= 30) {
-        return {
-            estado: 'aldia',
-            diasAtraso: 0,
-            ultimoPago: ultimoPago.fecha,
-            proximoPago: fechaProximoPago.toISOString().split('T')[0]
-        };
-    } else {
-        return {
-            estado: 'mora',
-            diasAtraso: diasDesdeUltimoPago - 30,
-            ultimoPago: ultimoPago.fecha,
-            proximoPago: fechaProximoPago.toISOString().split('T')[0]
-        };
-    }
+    return {
+        estado: estaAlDia ? 'aldia' : 'mora',
+        diasAtraso: estaAlDia ? 0 : diasDesdeUltimoPago - 30,
+        ultimoPago: ultimoPago.fecha,
+        proximoPago: fechaProximoPago.toISOString().split('T')[0]
+    };
 }
 
 // ========================================
@@ -90,12 +88,18 @@ function obtenerEstadoPago(cliente) {
 // ========================================
 
 function obtenerMontoPlan(plan) {
-    const montos = { navega: 400, vuelo: 500, elite: 600 };
+    const montos = { navega: 400, vuelo: 500, elite: 600, empresarial: 1000, personalizado: 350 };
     return montos[plan] || 400;
 }
 
 function getPlanNombre(plan) {
-    const nombres = { navega: 'NAVEGA 20MBPS', vuelo: 'VUELO 30MBPS', elite: 'ELITE 40MBPS' };
+    const nombres = { 
+        navega: 'NAVEGA 20MBPS', 
+        vuelo: 'VUELO 30MBPS', 
+        elite: 'ELITE 40MBPS',
+        empresarial: 'EMPRESARIAL',
+        personalizado: 'PERSONALIZADO'
+    };
     return nombres[plan] || 'NAVEGA';
 }
 
@@ -112,7 +116,7 @@ function escapeHtml(text) {
 
 let clienteSeleccionado = null;
 
-function abrirModalPago(clienteId) {
+window.abrirModalPago = function(clienteId) {
     const cliente = clientesGlobal.find(c => c.id === clienteId);
     if (!cliente) return;
     
@@ -134,9 +138,9 @@ function abrirModalPago(clienteId) {
     montoPago.value = obtenerMontoPlan(cliente.plan);
     
     modal.classList.add('active');
-}
+};
 
-async function verHistorialPagos(clienteId) {
+window.verHistorialPagos = async function(clienteId) {
     try {
         const response = await fetch(`${API_URL}/clientes/${clienteId}/pagos`);
         const pagos = await response.json();
@@ -149,7 +153,7 @@ async function verHistorialPagos(clienteId) {
         
         let historial = `📋 HISTORIAL DE PAGOS\nCliente: ${cliente.nombre}\n\n`;
         pagos.forEach(p => {
-            historial += `📅 ${p.fecha} | $${p.monto} | ${p.metodo} | Ref: ${p.referencia || 'N/A'}\n`;
+            historial += `📅 ${p.fecha} | $${p.monto} | ${p.metodo || 'N/A'} | Ref: ${p.referencia || 'N/A'}\n`;
         });
         
         alert(historial);
@@ -157,7 +161,7 @@ async function verHistorialPagos(clienteId) {
         console.error('Error al cargar historial:', error);
         alert('Error al cargar el historial de pagos');
     }
-}
+};
 
 // ========================================
 // ACTUALIZAR TABLA
@@ -165,16 +169,16 @@ async function verHistorialPagos(clienteId) {
 
 function actualizarTabla() {
     const tbody = document.getElementById('tablaPagosBody');
-    const buscador = document.getElementById('buscadorPagos').value.toLowerCase();
-    const filtroEstado = document.getElementById('filtroEstado').value;
-    const filtroMes = document.getElementById('filtroMes').value;
+    const buscador = document.getElementById('buscadorPagos')?.value.toLowerCase() || '';
+    const filtroEstado = document.getElementById('filtroEstado')?.value || 'todos';
+    const filtroMes = document.getElementById('filtroMes')?.value || '';
     
     let clientesFiltrados = [...clientesGlobal];
     
     if (buscador) {
         clientesFiltrados = clientesFiltrados.filter(c => 
-            c.nombre?.toLowerCase().includes(buscador) ||
-            c.telefono1?.includes(buscador)
+            (c.nombre || '').toLowerCase().includes(buscador) ||
+            (c.telefono1 || '').includes(buscador)
         );
     }
     
@@ -184,46 +188,40 @@ function actualizarTabla() {
         monto: obtenerMontoPlan(c.plan)
     }));
     
-    // Aplicar filtros
+    let resultado = [...clientesConEstado];
+    
     if (filtroEstado !== 'todos') {
-        const filtrados = clientesConEstado.filter(c => {
+        resultado = resultado.filter(c => {
             if (filtroEstado === 'aldia') return c.estadoPago.estado === 'aldia';
             if (filtroEstado === 'mora') return c.estadoPago.estado === 'mora';
             if (filtroEstado === 'pagohoy') {
                 const hoy = new Date().toISOString().split('T')[0];
-                const pagosHoy = pagosGlobal.filter(p => p.fecha === hoy);
-                return pagosHoy.some(p => p.cliente_id === c.id);
+                return pagosGlobal.some(p => p.cliente_id === c.id && p.fecha === hoy);
             }
             if (filtroEstado === 'esteMes') {
                 const mesActual = new Date().toISOString().slice(0,7);
-                const pagosEsteMes = pagosGlobal.filter(p => p.fecha.startsWith(mesActual));
-                return pagosEsteMes.some(p => p.cliente_id === c.id);
+                return pagosGlobal.some(p => p.cliente_id === c.id && p.fecha.startsWith(mesActual));
             }
             return true;
         });
-        clientesConEstado.length = 0;
-        clientesConEstado.push(...filtrados);
     }
     
     if (filtroMes) {
-        const filtrados = clientesConEstado.filter(c => {
-            const pagosEnMes = pagosGlobal.filter(p => p.fecha.startsWith(filtroMes) && p.cliente_id === c.id);
-            return pagosEnMes.length > 0;
-        });
-        clientesConEstado.length = 0;
-        clientesConEstado.push(...filtrados);
+        resultado = resultado.filter(c => 
+            pagosGlobal.some(p => p.cliente_id === c.id && p.fecha.startsWith(filtroMes))
+        );
     }
     
-    if (clientesConEstado.length === 0) {
+    if (resultado.length === 0) {
         tbody.innerHTML = `<tr><td colspan="10"><div class="sin-pagos"><i class="fas fa-credit-card"></i><p>No hay clientes que coincidan con la búsqueda</p></div></td></tr>`;
         return;
     }
     
-    tbody.innerHTML = clientesConEstado.map(cliente => `
+    tbody.innerHTML = resultado.map(cliente => `
         <tr>
             <td><span class="cliente-id">#${cliente.id}</span></td>
-            <td><span class="cliente-nombre">${escapeHtml(cliente.nombre)}</span></td>
-            <td>${cliente.telefono1}</td>
+            <td class="cliente-nombre">${escapeHtml(cliente.nombre)}</td>
+            <td>${cliente.telefono1 || '-'}</td>
             <td>${getPlanNombre(cliente.plan)}</td>
             <td><strong>$${cliente.monto}</strong></td>
             <td>${cliente.estadoPago.ultimoPago || 'Sin pagos'}</td>
@@ -238,7 +236,7 @@ function actualizarTabla() {
                     <i class="fas fa-history"></i>
                 </button>
             </td>
-        </tr>
+        </table>
     `).join('');
 }
 
@@ -248,7 +246,7 @@ function actualizarTabla() {
 
 function actualizarResumen() {
     const total = clientesGlobal.length;
-    let aldia = 0, mora = 0, totalRecaudado = 0;
+    let aldia = 0, mora = 0;
     
     clientesGlobal.forEach(c => {
         const estado = obtenerEstadoPago(c);
@@ -258,20 +256,12 @@ function actualizarResumen() {
     
     const mesActual = new Date().toISOString().slice(0,7);
     const pagosEsteMes = pagosGlobal.filter(p => p.fecha.startsWith(mesActual));
-    
-    // FORZAR A NÚMERO Y ELIMINAR CEROS A LA IZQUIERDA
-    totalRecaudado = pagosEsteMes.reduce((sum, p) => {
-        let monto = Number(p.monto);
-        if (isNaN(monto)) monto = 0;
-        return sum + monto;
-    }, 0);
+    const totalRecaudado = pagosEsteMes.reduce((sum, p) => sum + (Number(p.monto) || 0), 0);
     
     document.getElementById('totalClientes').textContent = total;
     document.getElementById('clientesAlDia').textContent = aldia;
     document.getElementById('clientesMora').textContent = mora;
     document.getElementById('pagosEsteMes').textContent = pagosEsteMes.length;
-    
-    // Formato sin cero a la izquierda
     document.getElementById('totalRecaudado').textContent = `$${totalRecaudado.toFixed(2)}`;
 }
 
@@ -279,39 +269,15 @@ function actualizarResumen() {
 // REGISTRAR PAGO VÍA API
 // ========================================
 
-// ========================================
-// REGISTRAR PAGO VÍA API
-// ========================================
-
 async function registrarPago(pago) {
-    try {
-        const response = await fetch(`${API_URL}/pagos`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(pago)
-        });
-        
-        if (!response.ok) throw new Error('Error al registrar pago');
-        
-        const nuevoPago = await response.json();
-        
-        // Actualizar pagosGlobal localmente
-        pagosGlobal.push(nuevoPago);
-        
-        return nuevoPago;
-    } catch (error) {
-        console.error('Error al registrar pago:', error);
-        throw error;
-    }
-}
-
-// ========================================
-// MOSTRAR ERROR
-// ========================================
-
-function mostrarError(mensaje) {
-    const tbody = document.getElementById('tablaPagosBody');
-    tbody.innerHTML = `<tr><td colspan="10"><div class="sin-pagos"><i class="fas fa-exclamation-triangle"></i><p>${mensaje}</p></div></td></tr>`;
+    const response = await fetch(`${API_URL}/pagos`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(pago)
+    });
+    
+    if (!response.ok) throw new Error('Error al registrar pago');
+    return await response.json();
 }
 
 // ========================================
@@ -321,7 +287,7 @@ function mostrarError(mensaje) {
 document.addEventListener('DOMContentLoaded', function() {
     cargarDatos();
     
-    document.getElementById('btnExportarPagos').addEventListener('click', () => {
+    document.getElementById('btnExportarPagos')?.addEventListener('click', () => {
         const exportData = {
             clientes: clientesGlobal,
             pagos: pagosGlobal,
@@ -336,54 +302,47 @@ document.addEventListener('DOMContentLoaded', function() {
         URL.revokeObjectURL(url);
     });
     
-    document.getElementById('buscadorPagos').addEventListener('input', actualizarTabla);
-    document.getElementById('filtroEstado').addEventListener('change', actualizarTabla);
-    document.getElementById('filtroMes').addEventListener('change', actualizarTabla);
+    document.getElementById('buscadorPagos')?.addEventListener('input', actualizarTabla);
+    document.getElementById('filtroEstado')?.addEventListener('change', actualizarTabla);
+    document.getElementById('filtroMes')?.addEventListener('change', actualizarTabla);
     
-    document.querySelector('.modal-close').addEventListener('click', () => {
+    document.querySelector('.modal-close')?.addEventListener('click', () => {
         document.getElementById('modalPago').classList.remove('active');
     });
     
     document.getElementById('formRegistroPago').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    
-    if (!clienteSeleccionado) return;
-    
-    const btnSubmit = e.target.querySelector('button[type="submit"]');
-    const textoOriginal = btnSubmit.innerHTML;
-    
-    // Deshabilitar botón para evitar múltiples envíos
-    btnSubmit.disabled = true;
-    btnSubmit.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
-    
-    const nuevoPago = {
-        clienteId: clienteSeleccionado.id,
-        fecha: document.getElementById('fechaPago').value,
-        monto: parseFloat(document.getElementById('montoPago').value),
-        metodo: document.getElementById('metodoPago').value,
-        referencia: document.getElementById('referenciaPago').value,
-        notas: document.getElementById('notasPago').value,
-        registradoPor: 'admin'
-    };
-    
-    try {
-        await registrarPago(nuevoPago);
+        e.preventDefault();
         
-        // Cerrar modal y resetear formulario
-        document.getElementById('modalPago').classList.remove('active');
-        document.getElementById('formRegistroPago').reset();
+        if (!clienteSeleccionado) return;
         
-        // Recargar datos
-        await cargarDatos();
+        const btnSubmit = e.target.querySelector('button[type="submit"]');
+        const textoOriginal = btnSubmit.innerHTML;
         
-        alert(`✅ Pago registrado para ${clienteSeleccionado.nombre}\nMonto: $${nuevoPago.monto}\nFecha: ${nuevoPago.fecha}`);
-    } catch (error) {
-        console.error(error);
-        alert('❌ Error al registrar el pago');
-    } finally {
-        // Reactivar botón
-        btnSubmit.disabled = false;
-        btnSubmit.innerHTML = textoOriginal;
-    }
-});
+        btnSubmit.disabled = true;
+        btnSubmit.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
+        
+        const nuevoPago = {
+            clienteId: clienteSeleccionado.id,
+            fecha: document.getElementById('fechaPago').value,
+            monto: parseFloat(document.getElementById('montoPago').value),
+            metodo: document.getElementById('metodoPago').value,
+            referencia: document.getElementById('referenciaPago').value,
+            notas: document.getElementById('notasPago').value,
+            registradoPor: 'admin'
+        };
+        
+        try {
+            await registrarPago(nuevoPago);
+            document.getElementById('modalPago').classList.remove('active');
+            document.getElementById('formRegistroPago').reset();
+            await cargarDatos(); // Recargar todo desde la API
+            alert(`✅ Pago registrado para ${clienteSeleccionado.nombre}\nMonto: $${nuevoPago.monto}\nFecha: ${nuevoPago.fecha}`);
+        } catch (error) {
+            console.error(error);
+            alert('❌ Error al registrar el pago');
+        } finally {
+            btnSubmit.disabled = false;
+            btnSubmit.innerHTML = textoOriginal;
+        }
+    });
 });
