@@ -268,3 +268,32 @@ body {
         flex-direction: column;
     }
 }
+
+.btn-cerrar-sesion {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: rgba(255,255,255,0.2);
+    border: none;
+    color: white;
+    padding: 8px 16px;
+    border-radius: 50px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-cerrar-sesion:hover {
+    background: rgba(255,255,255,0.3);
+    transform: scale(1.05);
+}
+
+/* Para el header que tiene position relative */
+.header-pagos,
+.header-tecnico {
+    position: relative;
+}

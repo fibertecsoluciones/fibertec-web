@@ -42,3 +42,9 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
         btn.innerHTML = originalText;
     }
 });
+
+// Cerrar sesión
+function cerrarSesion() {
+    sessionStorage.removeItem('user');
+    window.location.href = '/login.html';
+}
