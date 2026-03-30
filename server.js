@@ -179,6 +179,66 @@ app.post('/api/login', async (req, res) => {
   }
 });
 
+
+
+// Obtener todos los usuarios
+app.get('/api/usuarios', async (req, res) => {
+    try {
+        const result = await pool.query('SELECT id, nombre, email, rol, activo, fecha_registro FROM usuarios ORDER BY id');
+        res.json(result.rows);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// Crear usuario
+app.post('/api/usuarios', async (req, res) => {
+    const { nombre, email, password, rol, activo } = req.body;
+    try {
+        let query, params;
+        if (password) {
+            query = `INSERT INTO usuarios (nombre, email, password_hash, rol, activo) VALUES ($1, $2, crypt($3, gen_salt('bf')), $4, $5) RETURNING id`;
+            params = [nombre, email, password, rol, activo];
+        } else {
+            query = `INSERT INTO usuarios (nombre, email, rol, activo) VALUES ($1, $2, $3, $4) RETURNING id`;
+            params = [nombre, email, rol, activo];
+        }
+        const result = await pool.query(query, params);
+        res.json({ id: result.rows[0].id, message: 'Usuario creado' });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// Actualizar usuario
+app.put('/api/usuarios/:id', async (req, res) => {
+    const { nombre, email, password, rol, activo } = req.body;
+    const id = req.params.id;
+    try {
+        let query, params;
+        if (password) {
+            query = `UPDATE usuarios SET nombre = $1, email = $2, password_hash = crypt($3, gen_salt('bf')), rol = $4, activo = $5 WHERE id = $6`;
+            params = [nombre, email, password, rol, activo, id];
+        } else {
+            query = `UPDATE usuarios SET nombre = $1, email = $2, rol = $3, activo = $4 WHERE id = $5`;
+            params = [nombre, email, rol, activo, id];
+        }
+        await pool.query(query, params);
+        res.json({ message: 'Usuario actualizado' });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// Eliminar usuario
+app.delete('/api/usuarios/:id', async (req, res) => {
+    try {
+        await pool.query('DELETE FROM usuarios WHERE id = $1', [req.params.id]);
+        res.json({ message: 'Usuario eliminado' });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
 // ========================================
 // RUTAS ESTÁTICAS (HTML)
 // ========================================
