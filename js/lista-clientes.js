@@ -308,17 +308,26 @@ window.editarCliente = async function(clienteId) {
     document.getElementById('editMarcaModem').value = cliente.marca_modem || '';
     document.getElementById('editModeloModem').value = cliente.modelo_modem || '';
     document.getElementById('editSerialModem').value = cliente.serial_modem || '';
+    
+    console.log('Fecha:', cliente.fecha_instalacion);
     document.getElementById('editFechaInstalacion').value = cliente.fecha_instalacion || '';
     document.getElementById('editDiaPago').value = cliente.dia_pago || 15;
-    // IMPORTANTE: Usar el nombre correcto del campo (puede ser 'tecnico' o 'tecnico_nombre')
+    
+    // Técnico
     document.getElementById('editTecnico').value = cliente.tecnico || cliente.tecnico_nombre || '';
+    console.log('Técnico:', cliente.tecnico || cliente.tecnico_nombre || 'No tiene');
+    
+    // Observaciones
     document.getElementById('editObservaciones').value = cliente.observaciones || '';
+    console.log('Observaciones:', cliente.observaciones || 'No tiene');
     
     // Cargar foto existente
     if (cliente.foto) {
         previewFotoEditar.innerHTML = `<img src="${cliente.foto}" style="max-width: 100%; max-height: 150px; border-radius: 8px;">`;
+        console.log('✅ Foto cargada (longitud:', cliente.foto.length, 'caracteres)');
     } else {
         previewFotoEditar.innerHTML = '<span>Sin foto</span>';
+        console.log('❌ Foto no disponible');
     }
     editFotoInput.value = ''; // Limpiar input file
     
@@ -400,8 +409,16 @@ async function enviarActualizacion(datos, clienteId) {
         
         if (!response.ok) throw new Error('Error al actualizar');
         
+        const clienteActualizado = await response.json();
+        
+        // Actualizar el cliente en clientesGlobal
+        const index = clientesGlobal.findIndex(c => c.id == clienteId);
+        if (index !== -1) {
+            clientesGlobal[index] = clienteActualizado;
+        }
+        
         modalEditar.classList.remove('active');
-        await cargarClientes();
+        actualizarTabla();  // Recargar la tabla
         alert('✅ Cliente actualizado correctamente');
     } catch (error) {
         console.error('Error:', error);

@@ -40,7 +40,6 @@ app.get('/api/clientes/:id', async (req, res) => {
 
 
 
-// Actualizar cliente (completo)
 app.put('/api/clientes/:id', async (req, res) => {
   const { nombre, telefono1, telefono2, colonia, direccion, plan, ip, mac,
           marca_modem, modelo_modem, serial_modem, fecha_instalacion, 
@@ -58,7 +57,7 @@ app.put('/api/clientes/:id', async (req, res) => {
        marca_modem, modelo_modem, serial_modem, fecha_instalacion, 
        observaciones, tecnico, foto, dia_pago, req.params.id]
     );
-    res.json(result.rows[0]);
+    res.json(result.rows[0]);  // ✅ Devuelve el cliente completo
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
