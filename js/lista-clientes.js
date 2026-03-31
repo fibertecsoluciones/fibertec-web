@@ -310,15 +310,16 @@ window.editarCliente = async function(clienteId) {
     document.getElementById('editSerialModem').value = cliente.serial_modem || '';
     document.getElementById('editFechaInstalacion').value = cliente.fecha_instalacion || '';
     document.getElementById('editDiaPago').value = cliente.dia_pago || 15;
-    document.getElementById('editTecnico').value = cliente.tecnico || '';
+    // IMPORTANTE: Usar el nombre correcto del campo (puede ser 'tecnico' o 'tecnico_nombre')
+    document.getElementById('editTecnico').value = cliente.tecnico || cliente.tecnico_nombre || '';
+    document.getElementById('editObservaciones').value = cliente.observaciones || '';
     
     // Cargar foto existente
-   const previewFotoEditar = document.getElementById('previewFotoEditar');
-if (cliente.foto) {
-    previewFotoEditar.innerHTML = `<img src="${cliente.foto}" style="max-width: 100%; max-height: 150px; border-radius: 8px;">`;
-} else {
-    previewFotoEditar.innerHTML = '<span>Sin foto</span>';
-}
+    if (cliente.foto) {
+        previewFotoEditar.innerHTML = `<img src="${cliente.foto}" style="max-width: 100%; max-height: 150px; border-radius: 8px;">`;
+    } else {
+        previewFotoEditar.innerHTML = '<span>Sin foto</span>';
+    }
     editFotoInput.value = ''; // Limpiar input file
     
     modalEditar.classList.add('active');
@@ -353,23 +354,23 @@ formEditar.addEventListener('submit', async (e) => {
     
     const clienteId = document.getElementById('editClienteId').value;
     
-   const datosActualizados = {
-    nombre: document.getElementById('editNombre').value,
-    telefono1: document.getElementById('editTelefono1').value,
-    telefono2: document.getElementById('editTelefono2').value,
-    colonia: document.getElementById('editColonia').value,
-    direccion: document.getElementById('editDireccion').value,
-    plan: document.getElementById('editPlan').value,
-    ip: document.getElementById('editIp').value,
-    mac: document.getElementById('editMac').value,
-    marca_modem: document.getElementById('editMarcaModem').value,
-    modelo_modem: document.getElementById('editModeloModem').value,
-    serial_modem: document.getElementById('editSerialModem').value,
-    fecha_instalacion: document.getElementById('editFechaInstalacion').value,
-    observaciones: document.getElementById('editObservaciones').value,
-    tecnico: document.getElementById('editTecnico').value,
-    dia_pago: parseInt(document.getElementById('editDiaPago').value) || 15
-};
+    const datosActualizados = {
+        nombre: document.getElementById('editNombre').value,
+        telefono1: document.getElementById('editTelefono1').value,
+        telefono2: document.getElementById('editTelefono2').value,
+        colonia: document.getElementById('editColonia').value,
+        direccion: document.getElementById('editDireccion').value,
+        plan: document.getElementById('editPlan').value,
+        ip: document.getElementById('editIp').value,
+        mac: document.getElementById('editMac').value,
+        marca_modem: document.getElementById('editMarcaModem').value,
+        modelo_modem: document.getElementById('editModeloModem').value,
+        serial_modem: document.getElementById('editSerialModem').value,
+        fecha_instalacion: document.getElementById('editFechaInstalacion').value,
+        observaciones: document.getElementById('editObservaciones').value,
+        tecnico: document.getElementById('editTecnico').value,
+        dia_pago: parseInt(document.getElementById('editDiaPago').value) || 15
+    };
     
     // Si hay nueva foto, agregarla
     if (editFotoInput.files && editFotoInput.files[0]) {
