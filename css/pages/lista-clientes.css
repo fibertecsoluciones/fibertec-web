@@ -490,3 +490,97 @@ body {
 .header-tecnico {
     position: relative;
 }
+
+/* Modal Editar Cliente */
+.modal-editar {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.5);
+    z-index: 1000;
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-editar.active {
+    display: flex;
+}
+
+.modal-editar-contenido {
+    background: white;
+    border-radius: 20px;
+    max-width: 600px;
+    width: 90%;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.modal-editar .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.modal-editar .modal-header h3 {
+    color: #3188b2;
+}
+
+.modal-editar .modal-close {
+    font-size: 24px;
+    cursor: pointer;
+    color: #818181;
+}
+
+.modal-editar .modal-body {
+    padding: 20px;
+}
+
+.modal-editar .campo {
+    margin-bottom: 15px;
+}
+
+.modal-editar .campo label {
+    display: block;
+    font-weight: 500;
+    margin-bottom: 5px;
+    color: #2c3e50;
+    font-size: 14px;
+}
+
+.modal-editar .campo input,
+.modal-editar .campo select,
+.modal-editar .campo textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    font-family: 'Inter', sans-serif;
+}
+
+.acciones {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    white-space: nowrap;
+}
+
+.btn-editar {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 18px;
+    color: #3188b2;
+    padding: 5px;
+    border-radius: 6px;
+    transition: all 0.3s;
+}
+
+.btn-editar:hover {
+    background: rgba(49,136,178,0.1);
+    transform: scale(1.1);
+}

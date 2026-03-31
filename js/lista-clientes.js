@@ -38,7 +38,7 @@ function actualizarTabla() {
     totalSpan.textContent = filtrados.length;
     
     if (filtrados.length === 0) {
-        tbody.innerHTML = `<tr class="sin-registros"><td colspan="11"><div class="sin-clientes"><i class="fas fa-database"></i><p>No hay clientes registrados</p></div></td></tr>`;
+        tbody.innerHTML = `<tr class="sin-registros"><td colspan="11"><div class="sin-clientes"><i class="fas fa-database"></i><p>No hay clientes registrados</p></div>`;
         return;
     }
     
@@ -54,7 +54,12 @@ function actualizarTabla() {
             <td>${c.marca_modem || ''} ${c.modelo_modem || ''}</td>
             <td>${escapeHtml(c.tecnico_nombre || c.tecnico || 'N/A')}</td>
             <td>${c.fecha_instalacion || '-'}</td>
-            <td>${c.foto ? `<img src="${c.foto}" class="foto-miniatura" onclick="verFoto('${c.id}')">` : '-'}</td>
+            <td class="acciones">
+                ${c.foto ? `<img src="${c.foto}" class="foto-miniatura" onclick="verFoto('${c.id}')" title="Ver foto">` : '<span class="sin-foto">-</span>'}
+                <button class="btn-accion btn-editar" onclick="editarCliente(${c.id})" title="Editar cliente">
+                    <i class="fas fa-edit"></i>
+                </button>
+            </td>
         </tr>
     `).join('');
 }
@@ -277,6 +282,93 @@ document.getElementById('descargarPlantilla')?.addEventListener('click', (e) => 
     XLSX.utils.book_append_sheet(wb, ws, 'Clientes');
     XLSX.writeFile(wb, 'plantilla_clientes_fibertec.xlsx');
 });
+// ========================================
+// EDITAR CLIENTE
+// ========================================
 
+const modalEditar = document.getElementById('modalEditarCliente');
+const closeModalEditar = document.getElementById('closeModalEditar');
+const btnCancelarEditar = document.getElementById('btnCancelarEditar');
+const formEditar = document.getElementById('formEditarCliente');
+
+// Abrir modal con datos del cliente
+window.editarCliente = async function(clienteId) {
+    const cliente = clientesGlobal.find(c => c.id === clienteId);
+    if (!cliente) return;
+    
+    // Llenar formulario con datos actuales
+    document.getElementById('editClienteId').value = cliente.id;
+    document.getElementById('editNombre').value = cliente.nombre || '';
+    document.getElementById('editTelefono1').value = cliente.telefono1 || '';
+    document.getElementById('editTelefono2').value = cliente.telefono2 || '';
+    document.getElementById('editColonia').value = cliente.colonia || '';
+    document.getElementById('editDireccion').value = cliente.direccion || '';
+    document.getElementById('editPlan').value = cliente.plan || 'navega';
+    document.getElementById('editIp').value = cliente.ip || '';
+    document.getElementById('editMac').value = cliente.mac || '';
+    document.getElementById('editMarcaModem').value = cliente.marca_modem || '';
+    document.getElementById('editModeloModem').value = cliente.modelo_modem || '';
+    document.getElementById('editSerialModem').value = cliente.serial_modem || '';
+    document.getElementById('editDiaPago').value = cliente.dia_pago || 15;
+    
+    modalEditar.classList.add('active');
+};
+
+// Cerrar modal
+closeModalEditar.addEventListener('click', () => {
+    modalEditar.classList.remove('active');
+});
+btnCancelarEditar.addEventListener('click', () => {
+    modalEditar.classList.remove('active');
+});
+modalEditar.addEventListener('click', (e) => {
+    if (e.target === modalEditar) modalEditar.classList.remove('active');
+});
+
+// Guardar cambios
+formEditar.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const clienteId = document.getElementById('editClienteId').value;
+    const datosActualizados = {
+        nombre: document.getElementById('editNombre').value,
+        telefono1: document.getElementById('editTelefono1').value,
+        telefono2: document.getElementById('editTelefono2').value,
+        colonia: document.getElementById('editColonia').value,
+        direccion: document.getElementById('editDireccion').value,
+        plan: document.getElementById('editPlan').value,
+        ip: document.getElementById('editIp').value,
+        mac: document.getElementById('editMac').value,
+        marca_modem: document.getElementById('editMarcaModem').value,
+        modelo_modem: document.getElementById('editModeloModem').value,
+        serial_modem: document.getElementById('editSerialModem').value,
+        dia_pago: parseInt(document.getElementById('editDiaPago').value) || 15
+    };
+    
+    const btn = formEditar.querySelector('button[type="submit"]');
+    const originalText = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
+    
+    try {
+        const response = await fetch(`${API_URL}/clientes/${clienteId}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(datosActualizados)
+        });
+        
+        if (!response.ok) throw new Error('Error al actualizar');
+        
+        modalEditar.classList.remove('active');
+        await cargarClientes(); // Recargar la tabla
+        alert('✅ Cliente actualizado correctamente');
+    } catch (error) {
+        console.error('Error:', error);
+        alert('❌ Error al actualizar el cliente');
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = originalText;
+    }
+});
 // Inicializar
 cargarClientes();

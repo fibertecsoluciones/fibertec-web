@@ -126,6 +126,94 @@
         </div>
     </div>
 
+
+
+    <!-- MODAL PARA EDITAR CLIENTE -->
+<div id="modalEditarCliente" class="modal-editar">
+    <div class="modal-editar-contenido">
+        <div class="modal-header">
+            <h3><i class="fas fa-edit"></i> Editar Cliente</h3>
+            <span class="modal-close" id="closeModalEditar">&times;</span>
+        </div>
+        <div class="modal-body">
+            <form id="formEditarCliente">
+                <input type="hidden" id="editClienteId">
+                
+                <div class="campo">
+                    <label>Nombre completo *</label>
+                    <input type="text" id="editNombre" required>
+                </div>
+                
+                <div class="campo">
+                    <label>Teléfono 1 *</label>
+                    <input type="tel" id="editTelefono1" required>
+                </div>
+                
+                <div class="campo">
+                    <label>Teléfono 2</label>
+                    <input type="tel" id="editTelefono2">
+                </div>
+                
+                <div class="campo">
+                    <label>Colonia *</label>
+                    <input type="text" id="editColonia" required>
+                </div>
+                
+                <div class="campo">
+                    <label>Dirección *</label>
+                    <textarea id="editDireccion" rows="2" required></textarea>
+                </div>
+                
+                <div class="campo">
+                    <label>Plan *</label>
+                    <select id="editPlan" required>
+                        <option value="navega">NAVEGA - 20 MBPS - $400</option>
+                        <option value="vuelo">VUELO - 30 MBPS - $500</option>
+                        <option value="elite">ELITE - 40 MBPS - $600</option>
+                    </select>
+                </div>
+                
+                <div class="campo">
+                    <label>IP asignada</label>
+                    <input type="text" id="editIp" placeholder="192.168.1.100">
+                </div>
+                
+                <div class="campo">
+                    <label>MAC del módem</label>
+                    <input type="text" id="editMac" placeholder="AA:BB:CC:DD:EE:FF">
+                </div>
+                
+                <div class="campo">
+                    <label>Marca del módem</label>
+                    <input type="text" id="editMarcaModem">
+                </div>
+                
+                <div class="campo">
+                    <label>Modelo del módem</label>
+                    <input type="text" id="editModeloModem">
+                </div>
+                
+                <div class="campo">
+                    <label>Serial del módem</label>
+                    <input type="text" id="editSerialModem">
+                </div>
+                
+                <div class="campo">
+                    <label>Día de pago</label>
+                    <input type="number" id="editDiaPago" min="1" max="31">
+                </div>
+                
+                <div class="botones-form">
+                    <button type="button" class="btn-secundario" id="btnCancelarEditar">Cancelar</button>
+                    <button type="submit" class="btn-primario">
+                        <i class="fas fa-save"></i> Guardar Cambios
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="../js/auth.js"></script>
     <script src="../js/lista-clientes.js"></script>
