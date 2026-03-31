@@ -57,7 +57,9 @@ app.put('/api/clientes/:id', async (req, res) => {
        marca_modem, modelo_modem, serial_modem, fecha_instalacion, 
        observaciones, tecnico, foto, dia_pago, req.params.id]
     );
-    res.json(result.rows[0]);  // ✅ Devuelve el cliente completo
+    
+    console.log('Cliente actualizado:', result.rows[0]); // ← VER EN LOGS DE RAILWAY
+    res.json(result.rows[0]);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

@@ -411,14 +411,12 @@ async function enviarActualizacion(datos, clienteId) {
         
         modalEditar.classList.remove('active');
         
-        // Recargar toda la lista para asegurar datos actualizados
-        await cargarClientes();
+        // 🔥 FORZAR RECARGA COMPLETA DE LA PÁGINA
+        window.location.reload();
         
-        alert('✅ Cliente actualizado correctamente');
     } catch (error) {
         console.error('Error:', error);
         alert('❌ Error al actualizar el cliente');
-    } finally {
         btn.disabled = false;
         btn.innerHTML = originalText;
     }
