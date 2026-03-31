@@ -57,17 +57,17 @@
                         <th>Colonia</th>
                         <th>Plan</th>
                         <th>IP</th>
-                        <th>MAC</th>
+                        <!--<th>MAC</th>-->
                         <th>Módem</th>
-                        <th>Técnico</th>
-                        <th>Fecha</th>
+                        <!--<th>Técnico</th>-->
+                        <!--<th>Fecha</th>-->
                         <th>Foto</th>
                         <th>Día Pago</th>
                     </tr>
                 </thead>
                 <tbody id="tablaClientesBody">
                     <tr class="sin-registros">
-                        <td colspan="11">
+                        <td colspan="9">
                             <div class="sin-clientes">
                                 <i class="fas fa-database"></i>
                                 <p>No hay clientes registrados aún</p>
@@ -199,7 +199,10 @@
                     <input type="text" id="editSerialModem">
                 </div>
                 
-
+<div class="campo">
+    <label>Técnico responsable</label>
+    <input type="text" id="editTecnico" readonly>
+</div>
                 <div class="campo">
     <label>Fecha de instalación</label>
     <input type="date" id="editFechaInstalacion">

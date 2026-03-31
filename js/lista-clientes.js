@@ -52,8 +52,7 @@ function actualizarTabla() {
             <td><span class="cliente-ip">${c.ip || 'N/A'}</span></td>
             <td><span class="cliente-mac">${c.mac || 'N/A'}</span></td>
             <td>${c.marca_modem || ''} ${c.modelo_modem || ''}</td>
-            <td>${escapeHtml(c.tecnico_nombre || c.tecnico || 'N/A')}</td>
-            <td>${c.fecha_instalacion || '-'}</td>
+            
             <td>${c.dia_pago || 15}</td>
             <td class="acciones">
                 ${c.foto ? `<img src="${c.foto}" class="foto-miniatura" onclick="verFoto('${c.id}')" title="Ver foto">` : '<span class="sin-foto">-</span>'}
@@ -311,6 +310,7 @@ window.editarCliente = async function(clienteId) {
     document.getElementById('editModeloModem').value = cliente.modelo_modem || '';
     document.getElementById('editSerialModem').value = cliente.serial_modem || '';
     document.getElementById('editDiaPago').value = cliente.dia_pago || 15;
+    document.getElementById('editTecnico').value = cliente.tecnico || '';
     
     modalEditar.classList.add('active');
 };
