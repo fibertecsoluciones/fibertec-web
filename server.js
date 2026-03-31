@@ -43,17 +43,20 @@ app.get('/api/clientes/:id', async (req, res) => {
 // Actualizar cliente (completo)
 app.put('/api/clientes/:id', async (req, res) => {
   const { nombre, telefono1, telefono2, colonia, direccion, plan, ip, mac,
-          marca_modem, modelo_modem, serial_modem, dia_pago } = req.body;
+          marca_modem, modelo_modem, serial_modem, fecha_instalacion, 
+          observaciones, tecnico, foto, dia_pago } = req.body;
   try {
     const result = await pool.query(
       `UPDATE clientes 
        SET nombre = $1, telefono1 = $2, telefono2 = $3, colonia = $4, 
            direccion = $5, plan = $6, ip = $7, mac = $8,
            marca_modem = $9, modelo_modem = $10, serial_modem = $11,
-           dia_pago = $12
-       WHERE id = $13 RETURNING *`,
+           fecha_instalacion = $12, observaciones = $13, tecnico = $14, 
+           foto = $15, dia_pago = $16
+       WHERE id = $17 RETURNING *`,
       [nombre, telefono1, telefono2, colonia, direccion, plan, ip, mac,
-       marca_modem, modelo_modem, serial_modem, dia_pago, req.params.id]
+       marca_modem, modelo_modem, serial_modem, fecha_instalacion, 
+       observaciones, tecnico, foto, dia_pago, req.params.id]
     );
     res.json(result.rows[0]);
   } catch (err) {
