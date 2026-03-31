@@ -409,16 +409,11 @@ async function enviarActualizacion(datos, clienteId) {
         
         if (!response.ok) throw new Error('Error al actualizar');
         
-        const clienteActualizado = await response.json();
-        
-        // Actualizar el cliente en clientesGlobal
-        const index = clientesGlobal.findIndex(c => c.id == clienteId);
-        if (index !== -1) {
-            clientesGlobal[index] = clienteActualizado;
-        }
-        
         modalEditar.classList.remove('active');
-        actualizarTabla();  // Recargar la tabla
+        
+        // Recargar toda la lista para asegurar datos actualizados
+        await cargarClientes();
+        
         alert('✅ Cliente actualizado correctamente');
     } catch (error) {
         console.error('Error:', error);
@@ -428,6 +423,5 @@ async function enviarActualizacion(datos, clienteId) {
         btn.innerHTML = originalText;
     }
 }
-
 // Inicializar
 cargarClientes();
