@@ -4,7 +4,36 @@
 
 //const API_URL = '/api'; // Railway lo resuelve solo
 
+// ========================================
+// CARGAR TÉCNICO DESDE SESIÓN
+// ========================================
+
+
+
+
+
+
+function cargarTecnicoDesdeSesion() {
+    const user = sessionStorage.getItem('user');
+    if (user) {
+        const userData = JSON.parse(user);
+        const tecnicoInput = document.getElementById('tecnico');
+        if (tecnicoInput) {
+            // Usar el nombre del usuario logueado
+            tecnicoInput.value = userData.nombre || userData.username || 'Técnico';
+            // Hacer el campo de solo lectura
+            tecnicoInput.readOnly = true;
+            tecnicoInput.style.background = '#f0f0f0';
+            tecnicoInput.style.color = '#2c3e50';
+        }
+    }
+}
+
+
+
 document.addEventListener('DOMContentLoaded', function() {
+       cargarTecnicoDesdeSesion();
+    
     const form = document.getElementById('formAltaCliente');
     const btnLimpiar = document.getElementById('btnLimpiar');
     const btnObtenerCoords = document.getElementById('btnObtenerCoords');
