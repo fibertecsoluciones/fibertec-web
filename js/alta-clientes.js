@@ -2,16 +2,11 @@
 // ALTA DE CLIENTE - CON API (PostgreSQL)
 // ========================================
 
-//const API_URL = '/api'; // Railway lo resuelve solo
+// const API_URL = '/api'; // Viene de auth.js
 
 // ========================================
 // CARGAR TÉCNICO DESDE SESIÓN
 // ========================================
-
-
-
-
-
 
 function cargarTecnicoDesdeSesion() {
     const user = sessionStorage.getItem('user');
@@ -19,9 +14,7 @@ function cargarTecnicoDesdeSesion() {
         const userData = JSON.parse(user);
         const tecnicoInput = document.getElementById('tecnico');
         if (tecnicoInput) {
-            // Usar el nombre del usuario logueado
             tecnicoInput.value = userData.nombre || userData.username || 'Técnico';
-            // Hacer el campo de solo lectura
             tecnicoInput.readOnly = true;
             tecnicoInput.style.background = '#f0f0f0';
             tecnicoInput.style.color = '#2c3e50';
@@ -29,10 +22,8 @@ function cargarTecnicoDesdeSesion() {
     }
 }
 
-
-
 document.addEventListener('DOMContentLoaded', function() {
-       cargarTecnicoDesdeSesion();
+    cargarTecnicoDesdeSesion();
     
     const form = document.getElementById('formAltaCliente');
     const btnLimpiar = document.getElementById('btnLimpiar');
@@ -90,7 +81,7 @@ document.addEventListener('DOMContentLoaded', function() {
             e.preventDefault();
 
             // Validar campos requeridos
-            const campos = ['nombre', 'telefono1', 'colonia', 'direccion', 'plan', 'ip', 'mac', 'marcaModem', 'modeloModem', 'serialModem', 'tecnico'];
+            const campos = ['nombre', 'telefono1', 'colonia', 'direccion', 'plan', 'ip', 'mac', 'marcaModem', 'modeloModem', 'serialModem', 'tecnico', 'diaPago'];
             let faltan = false;
 
             campos.forEach(campo => {
@@ -131,6 +122,7 @@ document.addEventListener('DOMContentLoaded', function() {
             formData.append('fechaInstalacion', document.getElementById('fechaInstalacion').value);
             formData.append('observaciones', document.getElementById('observaciones').value);
             formData.append('tecnico', document.getElementById('tecnico').value);
+            formData.append('dia_pago', document.getElementById('diaPago').value || 15);  // ← NUEVO
             
             // Leer la foto como base64
             const file = inputFoto.files[0];
@@ -158,6 +150,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     mostrarMensaje('exito', `✅ Cliente registrado con ID: ${resultado.id}`);
                     form.reset();
                     document.getElementById('fechaInstalacion').value = hoy;
+                    document.getElementById('diaPago').value = 15; // Restaurar valor por defecto
                     previewFoto.innerHTML = '';
                     
                 } catch (error) {
@@ -175,6 +168,7 @@ document.addEventListener('DOMContentLoaded', function() {
         btnLimpiar.addEventListener('click', () => {
             form.reset();
             document.getElementById('fechaInstalacion').value = hoy;
+            document.getElementById('diaPago').value = 15;
             previewFoto.innerHTML = '';
             mostrarMensaje('', '');
             

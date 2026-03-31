@@ -54,6 +54,7 @@ function actualizarTabla() {
             <td>${c.marca_modem || ''} ${c.modelo_modem || ''}</td>
             <td>${escapeHtml(c.tecnico_nombre || c.tecnico || 'N/A')}</td>
             <td>${c.fecha_instalacion || '-'}</td>
+            <td>${c.dia_pago || 15}</td>
             <td class="acciones">
                 ${c.foto ? `<img src="${c.foto}" class="foto-miniatura" onclick="verFoto('${c.id}')" title="Ver foto">` : '<span class="sin-foto">-</span>'}
                 <button class="btn-accion btn-editar" onclick="editarCliente(${c.id})" title="Editar cliente">

@@ -584,3 +584,26 @@ body {
     background: rgba(49,136,178,0.1);
     transform: scale(1.1);
 }
+
+.acciones {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    white-space: nowrap;
+}
+
+.btn-editar {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 18px;
+    color: #3188b2;
+    padding: 5px;
+    border-radius: 6px;
+    transition: all 0.3s;
+}
+
+.btn-editar:hover {
+    background: rgba(49,136,178,0.1);
+    transform: scale(1.1);
+}
