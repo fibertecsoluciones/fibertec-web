@@ -38,6 +38,8 @@ app.get('/api/clientes/:id', async (req, res) => {
   }
 });
 
+
+
 // Actualizar cliente (completo)
 app.put('/api/clientes/:id', async (req, res) => {
   const { nombre, telefono1, telefono2, colonia, direccion, plan, ip, mac,
@@ -52,23 +54,6 @@ app.put('/api/clientes/:id', async (req, res) => {
        WHERE id = $13 RETURNING *`,
       [nombre, telefono1, telefono2, colonia, direccion, plan, ip, mac,
        marca_modem, modelo_modem, serial_modem, dia_pago, req.params.id]
-    );
-    res.json(result.rows[0]);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-// Actualizar cliente
-app.put('/api/clientes/:id', async (req, res) => {
-  const { nombre, telefono1, telefono2, colonia, direccion, plan, ip, mac } = req.body;
-  try {
-    const result = await pool.query(
-      `UPDATE clientes 
-       SET nombre = $1, telefono1 = $2, telefono2 = $3, colonia = $4, 
-           direccion = $5, plan = $6, ip = $7, mac = $8
-       WHERE id = $9 RETURNING *`,
-      [nombre, telefono1, telefono2, colonia, direccion, plan, ip, mac, req.params.id]
     );
     res.json(result.rows[0]);
   } catch (err) {

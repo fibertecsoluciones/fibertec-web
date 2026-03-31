@@ -331,20 +331,21 @@ formEditar.addEventListener('submit', async (e) => {
     e.preventDefault();
     
     const clienteId = document.getElementById('editClienteId').value;
-    const datosActualizados = {
-        nombre: document.getElementById('editNombre').value,
-        telefono1: document.getElementById('editTelefono1').value,
-        telefono2: document.getElementById('editTelefono2').value,
-        colonia: document.getElementById('editColonia').value,
-        direccion: document.getElementById('editDireccion').value,
-        plan: document.getElementById('editPlan').value,
-        ip: document.getElementById('editIp').value,
-        mac: document.getElementById('editMac').value,
-        marca_modem: document.getElementById('editMarcaModem').value,
-        modelo_modem: document.getElementById('editModeloModem').value,
-        serial_modem: document.getElementById('editSerialModem').value,
-        dia_pago: parseInt(document.getElementById('editDiaPago').value) || 15
-    };
+   const datosActualizados = {
+    nombre: document.getElementById('editNombre').value,
+    telefono1: document.getElementById('editTelefono1').value,
+    telefono2: document.getElementById('editTelefono2').value,
+    colonia: document.getElementById('editColonia').value,
+    direccion: document.getElementById('editDireccion').value,
+    plan: document.getElementById('editPlan').value,
+    ip: document.getElementById('editIp').value,
+    mac: document.getElementById('editMac').value,
+    marca_modem: document.getElementById('editMarcaModem').value,
+    modelo_modem: document.getElementById('editModeloModem').value,
+    serial_modem: document.getElementById('editSerialModem').value,
+    fecha_instalacion: document.getElementById('editFechaInstalacion').value,  // ← AGREGAR
+    dia_pago: parseInt(document.getElementById('editDiaPago').value) || 15
+};
     
     const btn = formEditar.querySelector('button[type="submit"]');
     const originalText = btn.innerHTML;
