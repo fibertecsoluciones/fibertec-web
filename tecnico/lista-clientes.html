@@ -61,7 +61,7 @@
                         <th>Módem</th>
                         <!--<th>Técnico</th>-->
                         <!--<th>Fecha</th>-->
-                        <th>Foto</th>
+                        <!--<th>Foto</th>-->
                         <th>Día Pago</th>
                     </tr>
                 </thead>
@@ -198,10 +198,17 @@
                     <label>Serial del módem</label>
                     <input type="text" id="editSerialModem">
                 </div>
+
+                <div class="campo">
+    <label>Foto del módem</label>
+    <div class="preview-foto-editar" id="previewFotoEditar"></div>
+    <input type="file" id="editFoto" accept="image/*">
+    <small class="ayuda">Puedes cambiar la foto seleccionando una nueva</small>
+</div>
                 
 <div class="campo">
     <label>Técnico responsable</label>
-    <input type="text" id="editTecnico" readonly>
+    <input type="text" id="editTecnico">
 </div>
                 <div class="campo">
     <label>Fecha de instalación</label>

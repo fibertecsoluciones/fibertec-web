@@ -2,7 +2,6 @@
 // LISTA DE CLIENTES - VERSIÓN TABLA
 // ========================================
 
-//const API_URL = window.location.origin + '/api';
 let clientesGlobal = [];
 
 async function cargarClientes() {
@@ -14,9 +13,9 @@ async function cargarClientes() {
     } catch (error) {
         console.error('Error:', error);
         document.getElementById('tablaClientesBody').innerHTML = `
-            <tr class="sin-registros"><td colspan="11">
+            <tr class="sin-registros"><td colspan="9">
                 <div class="sin-clientes"><i class="fas fa-database"></i><p>Error al cargar clientes</p></div>
-            </td></tr>
+            </tr>
         `;
     }
 }
@@ -38,7 +37,7 @@ function actualizarTabla() {
     totalSpan.textContent = filtrados.length;
     
     if (filtrados.length === 0) {
-        tbody.innerHTML = `<tr class="sin-registros"><td colspan="11"><div class="sin-clientes"><i class="fas fa-database"></i><p>No hay clientes registrados</p></div>`;
+        tbody.innerHTML = `<tr class="sin-registros"><td colspan="9"><div class="sin-clientes"><i class="fas fa-database"></i><p>No hay clientes registrados</p></div></tr>`;
         return;
     }
     
@@ -50,12 +49,9 @@ function actualizarTabla() {
             <td>${escapeHtml(c.colonia)}</td>
             <td>${getPlanBadge(c.plan)}</td>
             <td><span class="cliente-ip">${c.ip || 'N/A'}</span></td>
-            <td><span class="cliente-mac">${c.mac || 'N/A'}</span></td>
             <td>${c.marca_modem || ''} ${c.modelo_modem || ''}</td>
-            
             <td>${c.dia_pago || 15}</td>
             <td class="acciones">
-                ${c.foto ? `<img src="${c.foto}" class="foto-miniatura" onclick="verFoto('${c.id}')" title="Ver foto">` : '<span class="sin-foto">-</span>'}
                 <button class="btn-accion btn-editar" onclick="editarCliente(${c.id})" title="Editar cliente">
                     <i class="fas fa-edit"></i>
                 </button>
@@ -189,7 +185,7 @@ function procesarJSON(json) {
         modelo_modem: row.modelo_modem || row.Modelo || '',
         serial_modem: row.serial_modem || row.Serial || '',
         tecnico_nombre: row.tecnico_nombre || row.Tecnico || '',
-        dia_pago: row.dia_pago || 15   // ← NUEVA LÍNEA
+        dia_pago: row.dia_pago || 15
     }));
     validarClientes(clientes);
 }
@@ -231,21 +227,21 @@ btnConfirmarImportar?.addEventListener('click', async () => {
             const res = await fetch(`${API_URL}/clientes`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-    nombre: c.nombre,
-    telefono1: c.telefono1,
-    telefono2: c.telefono2 || '',
-    colonia: c.colonia,
-    direccion: c.direccion,
-    plan: c.plan,
-    ip: c.ip || '',
-    mac: c.mac || '',
-    marca_modem: c.marca_modem || '',
-    modelo_modem: c.modelo_modem || '',
-    serial_modem: c.serial_modem || '',
-    tecnico_nombre: c.tecnico_nombre || '',
-    dia_pago: c.dia_pago || 15   // ← NUEVA LÍNEA
-})
+                body: JSON.stringify({
+                    nombre: c.nombre,
+                    telefono1: c.telefono1,
+                    telefono2: c.telefono2 || '',
+                    colonia: c.colonia,
+                    direccion: c.direccion,
+                    plan: c.plan,
+                    ip: c.ip || '',
+                    mac: c.mac || '',
+                    marca_modem: c.marca_modem || '',
+                    modelo_modem: c.modelo_modem || '',
+                    serial_modem: c.serial_modem || '',
+                    tecnico_nombre: c.tecnico_nombre || '',
+                    dia_pago: c.dia_pago || 15
+                })
             });
             if (res.ok) importados++; else errores++;
         } catch (e) { errores++; }
@@ -282,6 +278,7 @@ document.getElementById('descargarPlantilla')?.addEventListener('click', (e) => 
     XLSX.utils.book_append_sheet(wb, ws, 'Clientes');
     XLSX.writeFile(wb, 'plantilla_clientes_fibertec.xlsx');
 });
+
 // ========================================
 // EDITAR CLIENTE
 // ========================================
@@ -290,6 +287,8 @@ const modalEditar = document.getElementById('modalEditarCliente');
 const closeModalEditar = document.getElementById('closeModalEditar');
 const btnCancelarEditar = document.getElementById('btnCancelarEditar');
 const formEditar = document.getElementById('formEditarCliente');
+const editFotoInput = document.getElementById('editFoto');
+const previewFotoEditar = document.getElementById('previewFotoEditar');
 
 // Abrir modal con datos del cliente
 window.editarCliente = async function(clienteId) {
@@ -309,8 +308,17 @@ window.editarCliente = async function(clienteId) {
     document.getElementById('editMarcaModem').value = cliente.marca_modem || '';
     document.getElementById('editModeloModem').value = cliente.modelo_modem || '';
     document.getElementById('editSerialModem').value = cliente.serial_modem || '';
+    document.getElementById('editFechaInstalacion').value = cliente.fecha_instalacion || '';
     document.getElementById('editDiaPago').value = cliente.dia_pago || 15;
     document.getElementById('editTecnico').value = cliente.tecnico || '';
+    
+    // Cargar foto existente
+    if (cliente.foto) {
+        previewFotoEditar.innerHTML = `<img src="${cliente.foto}" style="max-width: 100%; max-height: 150px; border-radius: 8px;">`;
+    } else {
+        previewFotoEditar.innerHTML = '<span>Sin foto</span>';
+    }
+    editFotoInput.value = ''; // Limpiar input file
     
     modalEditar.classList.add('active');
 };
@@ -326,27 +334,54 @@ modalEditar.addEventListener('click', (e) => {
     if (e.target === modalEditar) modalEditar.classList.remove('active');
 });
 
+// Previsualizar nueva foto
+editFotoInput.addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(event) {
+            previewFotoEditar.innerHTML = `<img src="${event.target.result}" style="max-width: 100%; max-height: 150px; border-radius: 8px;">`;
+        };
+        reader.readAsDataURL(file);
+    }
+});
+
 // Guardar cambios
 formEditar.addEventListener('submit', async (e) => {
     e.preventDefault();
     
     const clienteId = document.getElementById('editClienteId').value;
-   const datosActualizados = {
-    nombre: document.getElementById('editNombre').value,
-    telefono1: document.getElementById('editTelefono1').value,
-    telefono2: document.getElementById('editTelefono2').value,
-    colonia: document.getElementById('editColonia').value,
-    direccion: document.getElementById('editDireccion').value,
-    plan: document.getElementById('editPlan').value,
-    ip: document.getElementById('editIp').value,
-    mac: document.getElementById('editMac').value,
-    marca_modem: document.getElementById('editMarcaModem').value,
-    modelo_modem: document.getElementById('editModeloModem').value,
-    serial_modem: document.getElementById('editSerialModem').value,
-    fecha_instalacion: document.getElementById('editFechaInstalacion').value,  // ← AGREGAR
-    dia_pago: parseInt(document.getElementById('editDiaPago').value) || 15
-};
     
+    const datosActualizados = {
+        nombre: document.getElementById('editNombre').value,
+        telefono1: document.getElementById('editTelefono1').value,
+        telefono2: document.getElementById('editTelefono2').value,
+        colonia: document.getElementById('editColonia').value,
+        direccion: document.getElementById('editDireccion').value,
+        plan: document.getElementById('editPlan').value,
+        ip: document.getElementById('editIp').value,
+        mac: document.getElementById('editMac').value,
+        marca_modem: document.getElementById('editMarcaModem').value,
+        modelo_modem: document.getElementById('editModeloModem').value,
+        serial_modem: document.getElementById('editSerialModem').value,
+        fecha_instalacion: document.getElementById('editFechaInstalacion').value,
+        dia_pago: parseInt(document.getElementById('editDiaPago').value) || 15
+    };
+    
+    // Si hay nueva foto, agregarla
+    if (editFotoInput.files && editFotoInput.files[0]) {
+        const reader = new FileReader();
+        reader.onload = async function(event) {
+            datosActualizados.foto = event.target.result;
+            await enviarActualizacion(datosActualizados, clienteId);
+        };
+        reader.readAsDataURL(editFotoInput.files[0]);
+    } else {
+        await enviarActualizacion(datosActualizados, clienteId);
+    }
+});
+
+async function enviarActualizacion(datos, clienteId) {
     const btn = formEditar.querySelector('button[type="submit"]');
     const originalText = btn.innerHTML;
     btn.disabled = true;
@@ -356,13 +391,13 @@ formEditar.addEventListener('submit', async (e) => {
         const response = await fetch(`${API_URL}/clientes/${clienteId}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(datosActualizados)
+            body: JSON.stringify(datos)
         });
         
         if (!response.ok) throw new Error('Error al actualizar');
         
         modalEditar.classList.remove('active');
-        await cargarClientes(); // Recargar la tabla
+        await cargarClientes();
         alert('✅ Cliente actualizado correctamente');
     } catch (error) {
         console.error('Error:', error);
@@ -371,6 +406,7 @@ formEditar.addEventListener('submit', async (e) => {
         btn.disabled = false;
         btn.innerHTML = originalText;
     }
-});
+}
+
 // Inicializar
 cargarClientes();
