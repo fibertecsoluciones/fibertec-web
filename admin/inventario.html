@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FiberTec - Inventario</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="../css/base.css">
+    <link rel="stylesheet" href="../css/pages/control-pagos.css"> </head>
+<body>
+    <div class="container-inventario">
+        <header class="header-pagos">
+            <a href="dashboard.html" class="btn-volver-menu">
+                <i class="fas fa-arrow-left"></i> Menú Principal
+            </a>
+            <button class="btn-cerrar-sesion" onclick="cerrarSesion()">
+                <i class="fas fa-sign-out-alt"></i> Salir
+            </button>
+            <div class="logo-pagos"><span>Fiber<span>Tec</span></span></div>
+            <h1>📦 Control de Inventario</h1>
+        </header>
+
+        <div class="botones-accion" style="margin-top: 20px; display: flex; justify-content: space-between; padding: 0 20px;">
+            <div class="busqueda">
+                <input type="text" id="buscarProducto" placeholder="Buscar equipo o material...">
+            </div>
+            <button class="btn-primario" onclick="abrirModalInventario()">
+                <i class="fas fa-plus"></i> Agregar Material
+            </button>
+        </div>
+
+        <div class="tabla-pagos-container" style="margin: 20px;">
+            <table class="tabla-pagos">
+                <thead>
+                    <tr>
+                        <th>Material/Equipo</th>
+                        <th>Categoría</th>
+                        <th>Stock Actual</th>
+                        <th>Unidad</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="tablaInventarioBody">
+                    <tr>
+                        <td>Módem ONT Huawei HG8245H</td>
+                        <td>Equipos</td>
+                        <td><strong style="color: #3ea682;">25</strong></td>
+                        <td>Piezas</td>
+                        <td><span class="badge-admin">Disponible</span></td>
+                        <td>
+                            <button class="btn-edit"><i class="fas fa-edit"></i></button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script src="../js/auth.js"></script>
+    <script src="../js/inventario.js"></script>
+</body>
+</html>

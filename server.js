@@ -255,6 +255,18 @@ app.delete('/api/usuarios/:id', asegurarSesion, async (req, res) => {
     }
 });
 
+
+
+// Endpoint Inventario
+app.get('/api/inventario', asegurarSesion, async (req, res) => {
+    try {
+        const result = await pool.query('SELECT * FROM inventario ORDER BY nombre_articulo ASC');
+        res.json(result.rows);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
 // ========================================
 // RUTAS ESTÁTICAS (HTML PROTEGIDOS)
 // ========================================
@@ -294,6 +306,12 @@ app.get('/admin/*', soloAdmin, (req, res) => {
 // 4. Cualquier otra cosa en tecnico necesita sesión general
 app.get('/tecnico/*', asegurarSesion, (req, res) => {
     res.sendFile(path.join(__dirname, 'tecnico', req.params[0]));
+});
+
+
+// Ruta HTML protegida
+app.get('/admin/inventario.html', soloAdmin, (req, res) => {
+    res.sendFile(path.join(__dirname, 'admin', 'inventario.html'));
 });
 
 // Cargar archivos generales (CSS, JS, Imágenes)
