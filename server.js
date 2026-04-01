@@ -18,12 +18,21 @@ app.use(session({
     }
 }));
 
-// Función Portero
+// Portero General (Solo revisa que esté logueado)
 function asegurarSesion(req, res, next) {
     if (req.session && req.session.user) {
         return next();
     }
     res.redirect('/login.html');
+}
+
+// Portero de Administración (Solo deja pasar si el rol es 'admin')
+function soloAdmin(req, res, next) {
+    if (req.session && req.session.user && req.session.user.rol === 'admin') {
+        return next();
+    }
+    // Si es técnico y trata de entrar a algo de admin, lo mandamos a su página permitida
+    res.redirect('/tecnico/alta-cliente.html');
 }
 
 // Middleware
@@ -259,12 +268,26 @@ app.get('/planes', (req, res) => res.sendFile(path.join(__dirname, 'planes.html'
 app.get('/seguridad', (req, res) => res.sendFile(path.join(__dirname, 'seguridad.html')));
 app.get('/soluciones', (req, res) => res.sendFile(path.join(__dirname, 'soluciones.html')));
 
-// Rutas para admin y técnico con PORTERO
-app.get('/admin/*', asegurarSesion, (req, res) => {
-  res.sendFile(path.join(__dirname, 'admin', req.params[0] || 'control-pagos.html'));
+// --- RUTAS PROTEGIDAS POR ROL ---
+
+// 1. La lista de clientes solo la ve el ADMIN
+app.get('/tecnico/lista-clientes.html', soloAdmin, (req, res) => {
+    res.sendFile(path.join(__dirname, 'tecnico', 'lista-clientes.html'));
 });
+
+// 2. El alta de cliente la pueden ver AMBOS (Técnico y Admin)
+app.get('/tecnico/alta-cliente.html', asegurarSesion, (req, res) => {
+    res.sendFile(path.join(__dirname, 'tecnico', 'alta-cliente.html'));
+});
+
+// 3. Todo lo que esté en la carpeta /admin solo lo ve el ADMIN
+app.get('/admin/*', soloAdmin, (req, res) => {
+    res.sendFile(path.join(__dirname, 'admin', req.params[0] || 'control-pagos.html'));
+});
+
+// 4. Cualquier otra cosa en tecnico necesita sesión general
 app.get('/tecnico/*', asegurarSesion, (req, res) => {
-  res.sendFile(path.join(__dirname, 'tecnico', req.params[0] || 'alta-cliente.html'));
+    res.sendFile(path.join(__dirname, 'tecnico', req.params[0]));
 });
 
 // Cargar archivos generales (CSS, JS, Imágenes)
