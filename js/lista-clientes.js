@@ -280,22 +280,25 @@ document.getElementById('descargarPlantilla')?.addEventListener('click', (e) => 
 });
 
 // ========================================
-// EDITAR CLIENTE
+// EDITAR CLIENTE (FINAL CORREGIDO)
 // ========================================
 
 const modalEditar = document.getElementById('modalEditarCliente');
-const closeModalEditar = document.getElementById('closeModalEditar');
-const btnCancelarEditar = document.getElementById('btnCancelarEditar');
 const formEditar = document.getElementById('formEditarCliente');
-const editFotoInput = document.getElementById('editFoto');
 const previewFotoEditar = document.getElementById('previewFotoEditar');
+const editFotoInput = document.getElementById('editFoto');
+const btnCancelarEditar = document.getElementById('btnCancelarEditar');
+const closeModalEditar = document.getElementById('closeModalEditar');
 
-// Abrir modal con datos del cliente
+let fotoActualTemporal = null;
+
 window.editarCliente = async function(clienteId) {
     const cliente = clientesGlobal.find(c => c.id === clienteId);
     if (!cliente) return;
+
+    fotoActualTemporal = cliente.foto; 
     
-    // Llenar formulario con datos actuales
+    // Llenar campos
     document.getElementById('editClienteId').value = cliente.id;
     document.getElementById('editNombre').value = cliente.nombre || '';
     document.getElementById('editTelefono1').value = cliente.telefono1 || '';
@@ -308,44 +311,29 @@ window.editarCliente = async function(clienteId) {
     document.getElementById('editMarcaModem').value = cliente.marca_modem || '';
     document.getElementById('editModeloModem').value = cliente.modelo_modem || '';
     document.getElementById('editSerialModem').value = cliente.serial_modem || '';
-    
-    console.log('Fecha:', cliente.fecha_instalacion);
-    document.getElementById('editFechaInstalacion').value = cliente.fecha_instalacion || '';
-    document.getElementById('editDiaPago').value = cliente.dia_pago || 15;
-    
-    // Técnico
-    document.getElementById('editTecnico').value = cliente.tecnico || cliente.tecnico_nombre || '';
-    console.log('Técnico:', cliente.tecnico || cliente.tecnico_nombre || 'No tiene');
-    
-    // Observaciones
+    document.getElementById('editTecnico').value = cliente.tecnico || '';
     document.getElementById('editObservaciones').value = cliente.observaciones || '';
-    console.log('Observaciones:', cliente.observaciones || 'No tiene');
-    
-    // Cargar foto existente
+    document.getElementById('editDiaPago').value = cliente.dia_pago || 15;
+
+    // Corrección de fecha para el input date
+    if (cliente.fecha_instalacion) {
+        document.getElementById('editFechaInstalacion').value = cliente.fecha_instalacion.split('T')[0];
+    } else {
+        document.getElementById('editFechaInstalacion').value = '';
+    }
+
+    // Previsualizar foto existente
     if (cliente.foto) {
         previewFotoEditar.innerHTML = `<img src="${cliente.foto}" style="max-width: 100%; max-height: 150px; border-radius: 8px;">`;
-        console.log('✅ Foto cargada (longitud:', cliente.foto.length, 'caracteres)');
     } else {
         previewFotoEditar.innerHTML = '<span>Sin foto</span>';
-        console.log('❌ Foto no disponible');
     }
-    editFotoInput.value = ''; // Limpiar input file
     
+    editFotoInput.value = ''; 
     modalEditar.classList.add('active');
 };
 
-// Cerrar modal
-closeModalEditar.addEventListener('click', () => {
-    modalEditar.classList.remove('active');
-});
-btnCancelarEditar.addEventListener('click', () => {
-    modalEditar.classList.remove('active');
-});
-modalEditar.addEventListener('click', (e) => {
-    if (e.target === modalEditar) modalEditar.classList.remove('active');
-});
-
-// Previsualizar nueva foto
+// Previsualizar cuando el usuario selecciona una foto nueva
 editFotoInput.addEventListener('change', function(e) {
     const file = e.target.files[0];
     if (file) {
@@ -357,11 +345,13 @@ editFotoInput.addEventListener('change', function(e) {
     }
 });
 
-// Guardar cambios
+// Evento de guardado único
 formEditar.addEventListener('submit', async (e) => {
     e.preventDefault();
     
     const clienteId = document.getElementById('editClienteId').value;
+    const btn = formEditar.querySelector('button[type="submit"]');
+    const originalText = btn.innerHTML;
     
     const datosActualizados = {
         nombre: document.getElementById('editNombre').value,
@@ -378,28 +368,27 @@ formEditar.addEventListener('submit', async (e) => {
         fecha_instalacion: document.getElementById('editFechaInstalacion').value,
         observaciones: document.getElementById('editObservaciones').value,
         tecnico: document.getElementById('editTecnico').value,
-        dia_pago: parseInt(document.getElementById('editDiaPago').value) || 15
+        dia_pago: parseInt(document.getElementById('editDiaPago').value) || 15,
+        foto: fotoActualTemporal // Por defecto la vieja
     };
-    
-    // Si hay nueva foto, agregarla
+
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
+
+    // Si hay foto nueva, procesarla antes de enviar
     if (editFotoInput.files && editFotoInput.files[0]) {
         const reader = new FileReader();
         reader.onload = async function(event) {
             datosActualizados.foto = event.target.result;
-            await enviarActualizacion(datosActualizados, clienteId);
+            await enviarActualizacion(datosActualizados, clienteId, btn, originalText);
         };
         reader.readAsDataURL(editFotoInput.files[0]);
     } else {
-        await enviarActualizacion(datosActualizados, clienteId);
+        await enviarActualizacion(datosActualizados, clienteId, btn, originalText);
     }
 });
 
-async function enviarActualizacion(datos, clienteId) {
-    const btn = formEditar.querySelector('button[type="submit"]');
-    const originalText = btn.innerHTML;
-    btn.disabled = true;
-    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
-    
+async function enviarActualizacion(datos, clienteId, btn, originalText) {
     try {
         const response = await fetch(`${API_URL}/clientes/${clienteId}`, {
             method: 'PUT',
@@ -410,9 +399,7 @@ async function enviarActualizacion(datos, clienteId) {
         if (!response.ok) throw new Error('Error al actualizar');
         
         modalEditar.classList.remove('active');
-        
-        // 🔥 FORZAR RECARGA COMPLETA DE LA PÁGINA
-        window.location.reload();
+        window.location.reload(); // Recarga para ver cambios
         
     } catch (error) {
         console.error('Error:', error);
@@ -421,5 +408,15 @@ async function enviarActualizacion(datos, clienteId) {
         btn.innerHTML = originalText;
     }
 }
+
+// Control de cierre del modal
+[closeModalEditar, btnCancelarEditar].forEach(btn => {
+    btn?.addEventListener('click', () => modalEditar.classList.remove('active'));
+});
+
+modalEditar.addEventListener('click', (e) => {
+    if (e.target === modalEditar) modalEditar.classList.remove('active');
+});
+
 // Inicializar
 cargarClientes();
