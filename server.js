@@ -256,8 +256,11 @@ app.delete('/api/usuarios/:id', asegurarSesion, async (req, res) => {
 });
 
 
+// ========================================
+// ENDPOINTS INVENTARIO (ACTUALIZADO FIBERTEC)
+// ========================================
 
-// Endpoint Inventario
+// 1. Obtener todos los artículos
 app.get('/api/inventario', asegurarSesion, async (req, res) => {
     try {
         const result = await pool.query('SELECT * FROM inventario ORDER BY nombre_articulo ASC');
@@ -267,8 +270,7 @@ app.get('/api/inventario', asegurarSesion, async (req, res) => {
     }
 });
 
-
-// 1. Obtener UN solo artículo (Para cargar datos al editar)
+// 2. Obtener un solo artículo
 app.get('/api/inventario/:id', asegurarSesion, async (req, res) => {
     try {
         const result = await pool.query('SELECT * FROM inventario WHERE id = $1', [req.params.id]);
@@ -282,38 +284,51 @@ app.get('/api/inventario/:id', asegurarSesion, async (req, res) => {
     }
 });
 
-// 2. Insertar nuevo material (POST)
+// 3. Insertar nuevo material (POST) - AHORA CON TODAS LAS COLUMNAS
 app.post('/api/inventario', soloAdmin, async (req, res) => {
-    const { nombre_articulo, categoria, cantidad_actual, unidad_medida, stock_minimo } = req.body;
+    const { 
+        nombre_articulo, categoria, cantidad_actual, unidad_medida, 
+        stock_minimo, codigo_fibertec, metros_iniciales, metros_actuales 
+    } = req.body;
+    
     try {
         const result = await pool.query(
-            `INSERT INTO inventario (nombre_articulo, categoria, cantidad_actual, unidad_medida, stock_minimo) 
-             VALUES ($1, $2, $3, $4, $5) RETURNING *`,
-            [nombre_articulo, categoria, cantidad_actual, unidad_medida, stock_minimo]
+            `INSERT INTO inventario 
+            (nombre_articulo, categoria, cantidad_actual, unidad_medida, stock_minimo, codigo_fibertec, metros_iniciales, metros_actuales) 
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *`,
+            [nombre_articulo, categoria, cantidad_actual, unidad_medida, stock_minimo, codigo_fibertec, metros_iniciales, metros_actuales]
         );
         res.json(result.rows[0]);
     } catch (err) {
+        console.error("Error en POST inventario:", err);
         res.status(500).json({ error: err.message });
     }
 });
 
-// 3. Actualizar material existente (PUT)
+// 4. Actualizar material (PUT) - AHORA CON TODAS LAS COLUMNAS
 app.put('/api/inventario/:id', soloAdmin, async (req, res) => {
-    const { nombre_articulo, categoria, cantidad_actual, unidad_medida, stock_minimo } = req.body;
+    const { 
+        nombre_articulo, categoria, cantidad_actual, unidad_medida, 
+        stock_minimo, codigo_fibertec, metros_iniciales, metros_actuales 
+    } = req.body;
+    
     try {
         const result = await pool.query(
             `UPDATE inventario 
-             SET nombre_articulo = $1, categoria = $2, cantidad_actual = $3, unidad_medida = $4, stock_minimo = $5, ultima_actualizacion = CURRENT_TIMESTAMP
-             WHERE id = $6 RETURNING *`,
-            [nombre_articulo, categoria, cantidad_actual, unidad_medida, stock_minimo, req.params.id]
+             SET nombre_articulo = $1, categoria = $2, cantidad_actual = $3, unidad_medida = $4, 
+                 stock_minimo = $5, codigo_fibertec = $6, metros_iniciales = $7, metros_actuales = $8,
+                 ultima_actualizacion = CURRENT_TIMESTAMP
+             WHERE id = $9 RETURNING *`,
+            [nombre_articulo, categoria, cantidad_actual, unidad_medida, stock_minimo, codigo_fibertec, metros_iniciales, metros_actuales, req.params.id]
         );
         res.json(result.rows[0]);
     } catch (err) {
+        console.error("Error en PUT inventario:", err);
         res.status(500).json({ error: err.message });
     }
 });
 
-// 4. Eliminar material (DELETE)
+// 5. Eliminar material
 app.delete('/api/inventario/:id', soloAdmin, async (req, res) => {
     try {
         await pool.query('DELETE FROM inventario WHERE id = $1', [req.params.id]);

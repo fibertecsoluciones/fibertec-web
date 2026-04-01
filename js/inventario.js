@@ -35,12 +35,14 @@ function renderizarTabla(lista) {
     tbody.innerHTML = '';
 
     lista.forEach(item => {
-        // Prioridad: Si hay metros_actuales, usamos ese stock, si no, cantidad_actual
-        const stockReal = item.metros_actuales !== null ? item.metros_actuales : item.cantidad_actual;
+        // Lógica de FiberTec: Si metros_actuales no es null, usamos ese valor
+        const esMaterialPorMetros = item.metros_actuales !== null;
+        const stockReal = esMaterialPorMetros ? item.metros_actuales : item.cantidad_actual;
+        
         const claseStock = stockReal <= item.stock_minimo ? 'stock-bajo' : 'stock-ok';
         
         const nombreDisplay = item.codigo_fibertec 
-            ? `<span class="nomenclatura-ft">${item.codigo_fibertec}</span><br><strong>${item.nombre_articulo}</strong>`
+            ? `<span class="nomenclatura-ft" style="background:#004a99; color:white; padding:2px 6px; border-radius:4px; font-size:10px;">${item.codigo_fibertec}</span><br><strong>${item.nombre_articulo}</strong>`
             : `<strong>${item.nombre_articulo}</strong>`;
 
         tbody.innerHTML += `
@@ -99,7 +101,8 @@ function cerrarModalInventario() {
     modalInventario.style.display = 'none';
 }
 
-// 7. EDITAR
+
+// 7. EDITAR (Ajustado para FiberTec)
 async function cargarDatosProducto(id) {
     try {
         const resp = await fetch(`/api/inventario/${id}`);
@@ -111,10 +114,11 @@ async function cargarDatosProducto(id) {
         document.getElementById('stock_minimo').value = item.stock_minimo;
         document.getElementById('unidad_medida').value = item.unidad_medida;
 
+        // Si el item tiene código de FiberTec, cargamos los metros
         if (item.codigo_fibertec) {
             document.getElementById('codigo_fibertec').value = item.codigo_fibertec;
-            document.getElementById('metros_actuales').value = item.cantidad_actual;
-            document.getElementById('metros_iniciales').value = item.metros_iniciales || item.cantidad_actual;
+            document.getElementById('metros_actuales').value = item.metros_actuales;
+            document.getElementById('metros_iniciales').value = item.metros_iniciales;
         } else {
             document.getElementById('cantidad_actual').value = item.cantidad_actual;
         }
