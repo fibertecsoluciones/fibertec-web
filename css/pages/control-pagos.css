@@ -352,3 +352,39 @@ body {
     background: #3188b2;
     color: white;
 }
+
+/* Botón Volver al Menú Principal */
+.btn-volver-menu {
+    position: absolute;
+    top: 20px;
+    left: 20px; /* Al lado opuesto de "Salir" */
+    background: rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: white;
+    padding: 8px 18px;
+    border-radius: 50px;
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-volver-menu:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: translateX(-5px); /* Efecto visual de "regreso" */
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    color: white;
+}
+
+/* Ajuste para móviles */
+@media (max-width: 768px) {
+    .btn-volver-menu {
+        padding: 6px 12px;
+        font-size: 11px;
+        top: 10px;
+        left: 10px;
+    }
+}
