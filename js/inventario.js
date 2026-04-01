@@ -1,8 +1,8 @@
 /* ========================================
-   FIBERTEC - SISTEMA DE INVENTARIO ÚNICO
+   FIBERTEC - SISTEMA DE INVENTARIO
    ======================================== */
 
-// 1. DECLARACIÓN DE VARIABLES GLOBALES (Solo una vez)
+// 1. DECLARACIÓN DE VARIABLES (Una sola vez)
 const modalInventario = document.getElementById('modalInventario');
 const formInventario = document.getElementById('formInventario');
 
@@ -10,19 +10,17 @@ const formInventario = document.getElementById('formInventario');
 document.addEventListener('DOMContentLoaded', () => {
     cargarInventario();
     
-    // Listeners para la lógica de Fibra/Carretes
     const inputNombre = document.getElementById('nombre_articulo');
-    const selectCat = document.getElementById('categoria');
-
-    if (inputNombre) inputNombre.addEventListener('input', verificarTipoProducto);
-    if (selectCat) selectCat.addEventListener('change', verificarTipoProducto);
+    if (inputNombre) {
+        inputNombre.addEventListener('input', verificarCategoria);
+    }
 });
 
-// 3. OBTENER DATOS
+// 3. OBTENER DATOS DE LA API
 async function cargarInventario() {
     try {
         const resp = await fetch('/api/inventario');
-        if (!resp.ok) throw new Error("Error en API");
+        if (!resp.ok) throw new Error("Error en la red");
         const materiales = await resp.json();
         renderizarTabla(materiales);
     } catch (err) {
@@ -39,9 +37,9 @@ function renderizarTabla(lista) {
     lista.forEach(item => {
         const claseStock = item.cantidad_actual <= item.stock_minimo ? 'stock-bajo' : 'stock-ok';
         
-        // Mostrar Nomenclatura FiberTec solo si existe (Carretes)
+        // Nomenclatura para Carretes
         const nombreDisplay = item.codigo_fibertec 
-            ? `<span style="background:#e2e8f0; padding:2px 5px; border-radius:4px; font-size:0.8em; font-family:monospace;">${item.codigo_fibertec}</span><br><strong>${item.nombre_articulo}</strong>`
+            ? `<span class="nomenclatura-ft">${item.codigo_fibertec}</span><br><strong>${item.nombre_articulo}</strong>`
             : `<strong>${item.nombre_articulo}</strong>`;
 
         tbody.innerHTML += `
@@ -53,15 +51,15 @@ function renderizarTabla(lista) {
                 <td>${item.cantidad_actual > 0 ? '✅ Disponible' : '❌ Agotado'}</td>
                 <td>
                     <button class="btn-edit" onclick="editarProducto(${item.id})"><i class="fas fa-edit"></i></button>
-                    <button class="btn-edit" style="color:#ff6b6b;" onclick="eliminarProducto(${item.id})"><i class="fas fa-trash"></i></button>
+                    <button class="btn-edit" style="color:#ff6b6b; background:rgba(255,107,107,0.1);" onclick="eliminarProducto(${item.id})"><i class="fas fa-trash"></i></button>
                 </td>
             </tr>
         `;
     });
 }
 
-// 5. LÓGICA DINÁMICA (Solo carretes llevan nomenclatura)
-function verificarTipoProducto() {
+// 5. LÓGICA DE CATEGORÍAS (Esta es la que pedía tu HTML)
+function verificarCategoria() {
     const nombre = document.getElementById('nombre_articulo').value.toLowerCase();
     const categoria = document.getElementById('categoria').value;
     const seccionFibra = document.getElementById('seccion-fibra');
@@ -81,14 +79,14 @@ function verificarTipoProducto() {
     }
 }
 
-// 6. CONTROL DEL MODAL
+// 6. MODAL (Abrir/Cerrar)
 function abrirModalInventario(id = null) {
     if (!formInventario) return;
     formInventario.reset();
     document.getElementById('productoId').value = '';
     document.getElementById('modalInventarioTitulo').innerHTML = id ? '<i class="fas fa-edit"></i> Editar Material' : '<i class="fas fa-plus"></i> Nuevo Material';
     
-    verificarTipoProducto();
+    verificarCategoria();
 
     if (id) {
         cargarDatosProducto(id);
@@ -119,11 +117,11 @@ async function cargarDatosProducto(id) {
         } else {
             document.getElementById('cantidad_actual').value = item.cantidad_actual;
         }
-        verificarTipoProducto();
-    } catch (err) { console.error(err); }
+        verificarCategoria();
+    } catch (err) { console.error("Error cargando producto:", err); }
 }
 
-// 8. GUARDAR (POST/PUT)
+// 8. GUARDAR
 formInventario.onsubmit = async (e) => {
     e.preventDefault();
     const id = document.getElementById('productoId').value;
@@ -157,11 +155,16 @@ formInventario.onsubmit = async (e) => {
 // 9. ELIMINAR
 async function eliminarProducto(id) {
     if (confirm("¿Eliminar este artículo de FiberTec?")) {
-        await fetch(`/api/inventario/${id}`, { method: 'DELETE' });
-        cargarInventario();
+        try {
+            const resp = await fetch(`/api/inventario/${id}`, { method: 'DELETE' });
+            if (res.ok) cargarInventario();
+        } catch (err) { console.error(err); }
     }
 }
 
-// Global para botones de tabla
-window.editarProducto = editarProducto;
+// 10. EXPOSICIÓN GLOBAL (Muy importante para que el HTML los vea)
+window.abrirModalInventario = abrirModalInventario;
+window.cerrarModalInventario = cerrarModalInventario;
+window.verificarCategoria = verificarCategoria;
+window.editarProducto = (id) => abrirModalInventario(id);
 window.eliminarProducto = eliminarProducto;
