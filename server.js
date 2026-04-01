@@ -270,6 +270,12 @@ app.get('/soluciones', (req, res) => res.sendFile(path.join(__dirname, 'solucion
 
 // --- RUTAS PROTEGIDAS POR ROL ---
 
+
+
+// Dashboard Principal (ADMIN)
+app.get('/admin/dashboard.html', soloAdmin, (req, res) => {
+    res.sendFile(path.join(__dirname, 'admin', 'dashboard.html'));
+});
 // 1. La lista de clientes solo la ve el ADMIN
 app.get('/tecnico/lista-clientes.html', soloAdmin, (req, res) => {
     res.sendFile(path.join(__dirname, 'tecnico', 'lista-clientes.html'));

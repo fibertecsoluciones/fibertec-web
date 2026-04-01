@@ -30,7 +30,7 @@ if (document.getElementById('loginForm')) {
                 
                 // Redirección por Rol
                 if (data.user.rol === 'admin') {
-                    window.location.href = '/admin/control-pagos.html';
+                    window.location.href = '/admin/dashboard.html';
                 } else {
                     window.location.href = '/tecnico/alta-cliente.html';
                 }
