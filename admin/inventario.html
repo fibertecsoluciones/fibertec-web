@@ -58,6 +58,63 @@
         </div>
     </div>
 
+
+    <div id="modalInventario" class="modal-usuario" style="display: none;">
+    <div class="modal-usuario-contenido">
+        <div class="modal-header">
+            <h3 id="modalInventarioTitulo"><i class="fas fa-box"></i> Nuevo Material</h3>
+            <span class="modal-close" onclick="cerrarModalInventario()">&times;</span>
+        </div>
+        <div class="modal-body">
+            <form id="formInventario">
+                <input type="hidden" id="productoId">
+                
+                <div class="campo">
+                    <label>Nombre del Material/Equipo *</label>
+                    <input type="text" id="nombre_articulo" required placeholder="Ej: Módem Huawei HG8245H">
+                </div>
+                
+                <div class="campo">
+                    <label>Categoría *</label>
+                    <select id="categoria" required>
+                        <option value="Equipos">ONTs / Routers</option>
+                        <option value="Fibra">Planta Externa (Fibra/Splitters)</option>
+                        <option value="Consumibles">Consumibles (Conectores/Grapas)</option>
+                        <option value="Herramientas">Herramientas</option>
+                    </select>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                    <div class="campo">
+                        <label>Cantidad Actual *</label>
+                        <input type="number" id="cantidad_actual" required min="0" value="0">
+                    </div>
+                    <div class="campo">
+                        <label>Stock Mínimo</label>
+                        <input type="number" id="stock_minimo" required min="0" value="5">
+                    </div>
+                </div>
+
+                <div class="campo">
+                    <label>Unidad de Medida</label>
+                    <select id="unidad_medida">
+                        <option value="Piezas">Piezas</option>
+                        <option value="Metros">Metros</option>
+                        <option value="Kits">Kits</option>
+                    </select>
+                </div>
+
+                <div class="botones-form">
+                    <button type="button" class="btn-secundario" onclick="cerrarModalInventario()">Cancelar</button>
+                    <button type="submit" class="btn-primario">
+                        <i class="fas fa-save"></i> Guardar en Almacén
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
     <script src="../js/auth.js"></script>
     <script src="../js/inventario.js"></script>
 </body>

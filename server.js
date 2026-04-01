@@ -267,6 +267,62 @@ app.get('/api/inventario', asegurarSesion, async (req, res) => {
     }
 });
 
+
+// 1. Obtener UN solo artículo (Para cargar datos al editar)
+app.get('/api/inventario/:id', asegurarSesion, async (req, res) => {
+    try {
+        const result = await pool.query('SELECT * FROM inventario WHERE id = $1', [req.params.id]);
+        if (result.rows.length > 0) {
+            res.json(result.rows[0]);
+        } else {
+            res.status(404).json({ error: "Artículo no encontrado" });
+        }
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// 2. Insertar nuevo material (POST)
+app.post('/api/inventario', soloAdmin, async (req, res) => {
+    const { nombre_articulo, categoria, cantidad_actual, unidad_medida, stock_minimo } = req.body;
+    try {
+        const result = await pool.query(
+            `INSERT INTO inventario (nombre_articulo, categoria, cantidad_actual, unidad_medida, stock_minimo) 
+             VALUES ($1, $2, $3, $4, $5) RETURNING *`,
+            [nombre_articulo, categoria, cantidad_actual, unidad_medida, stock_minimo]
+        );
+        res.json(result.rows[0]);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// 3. Actualizar material existente (PUT)
+app.put('/api/inventario/:id', soloAdmin, async (req, res) => {
+    const { nombre_articulo, categoria, cantidad_actual, unidad_medida, stock_minimo } = req.body;
+    try {
+        const result = await pool.query(
+            `UPDATE inventario 
+             SET nombre_articulo = $1, categoria = $2, cantidad_actual = $3, unidad_medida = $4, stock_minimo = $5, ultima_actualizacion = CURRENT_TIMESTAMP
+             WHERE id = $6 RETURNING *`,
+            [nombre_articulo, categoria, cantidad_actual, unidad_medida, stock_minimo, req.params.id]
+        );
+        res.json(result.rows[0]);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// 4. Eliminar material (DELETE)
+app.delete('/api/inventario/:id', soloAdmin, async (req, res) => {
+    try {
+        await pool.query('DELETE FROM inventario WHERE id = $1', [req.params.id]);
+        res.json({ message: 'Artículo eliminado del inventario' });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
 // ========================================
 // RUTAS ESTÁTICAS (HTML PROTEGIDOS)
 // ========================================
