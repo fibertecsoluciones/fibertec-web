@@ -180,13 +180,29 @@ formInventario.onsubmit = async (e) => {
     }
 };
 
-// 9. ELIMINAR
+// 9. ELIMINAR (Corregido para actualización instantánea)
 async function eliminarProducto(id) {
-    if (confirm("¿Eliminar este artículo de FiberTec?")) {
+    // Usamos un confirm personalizado para FiberTec
+    if (confirm("¿Estás seguro de eliminar este artículo del inventario de FiberTec?")) {
         try {
-            const resp = await fetch(`/api/inventario/${id}`, { method: 'DELETE' });
-            if (res.ok) cargarInventario();
-        } catch (err) { console.error(err); }
+            const res = await fetch(`/api/inventario/${id}`, { 
+                method: 'DELETE' 
+            });
+
+            if (res.ok) {
+                // ESTA ES LA CLAVE: Volvemos a pedir los datos para refrescar la tabla
+                await cargarInventario(); 
+                
+                // Opcional: Un pequeño aviso visual
+                console.log("Producto eliminado y tabla actualizada");
+            } else {
+                const errorData = await res.json();
+                alert("Error al eliminar: " + (errorData.error || "Error desconocido"));
+            }
+        } catch (err) {
+            console.error("Error en la conexión:", err);
+            alert("No se pudo conectar con el servidor para eliminar.");
+        }
     }
 }
 
