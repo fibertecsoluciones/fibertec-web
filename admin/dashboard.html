@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FiberTec - Dashboard Admin</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <link rel="stylesheet" href="../css/base.css">
+    <link rel="stylesheet" href="../css/pages/control-pagos.css"> <link rel="stylesheet" href="../css/pages/home.css"> </head>
+<body>
+    <div class="container-pagos">
+        <header class="header-pagos">
+            <button class="btn-cerrar-sesion" onclick="cerrarSesion()">
+                <i class="fas fa-sign-out-alt"></i> Salir
+            </button>
+            <div class="logo-pagos"><span>Fiber<span>Tec</span></span></div>
+            <h1>Panel Administrativo</h1>
+            <div class="user-info-display">
+                <i class="fas fa-user-shield"></i>
+                <span>Bienvenido: <span id="userNameDisplay">...</span></span>
+                <span class="badge-admin" id="rolBadge">ADMIN</span>
+            </div>
+        </header>
+
+        <main class="grid-menu-admin">
+            <a href="control-pagos.html" class="card-admin">
+                <i class="fas fa-money-bill-trend-up"></i>
+                <h3>Cobranza</h3>
+                <p>Gestionar pagos y morosos</p>
+            </a>
+            
+            <a href="../tecnico/lista-clientes.html" class="card-admin">
+                <i class="fas fa-users-gear"></i>
+                <h3>Clientes</h3>
+                <p>Administrar base de datos</p>
+            </a>
+
+            <a href="usuarios.html" class="card-admin">
+                <i class="fas fa-user-tie"></i>
+                <h3>Usuarios</h3>
+                <p>Gestionar técnicos y accesos</p>
+            </a>
+
+            <a href="../tecnico/alta-cliente.html" class="card-admin">
+                <i class="fas fa-file-contract"></i>
+                <h3>Nuevas Altas</h3>
+                <p>Registrar nuevos contratos</p>
+            </a>
+        </main>
+    </div>
+
+    <script src="../js/auth.js"></script>
+</body>
+</html>
