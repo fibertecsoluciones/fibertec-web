@@ -43,8 +43,7 @@
                         <th>Acciones</th>
                     </tr>
                 </thead>
-                <tbody id="tablaInventarioBody">
-                    </tbody>
+                <tbody id="tablaInventarioBody"></tbody>
             </table>
         </div>
     </div>
@@ -61,24 +60,41 @@
                     
                     <div class="campo">
                         <label>Nombre del Material/Equipo *</label>
-                        <input type="text" id="nombre_articulo" required placeholder="Ej: Módem Huawei HG8245H">
+                        <select id="nombre_articulo" required onchange="verificarCategoria()">
+                            <option value="">-- Seleccione Producto --</option>
+                            <optgroup label="Fibra Óptica">
+                                <option value="FIBRA DROP 1 CO">Fibra Drop 1 Hilo</option>
+                                <option value="FIBRA DROP 2 CO">Fibra Drop 2 Hilos</option>
+                                <option value="FIBRA ADSS 6 FO">Fibra ADSS 6 Hilos</option>
+                            </optgroup>
+                            <optgroup label="Equipos de Red">
+                                <option value="MODEM HUAWEI 4E">Módem Huawei (4 Antenas)</option>
+                                <option value="MODEM HUAWEI 2E">Módem Huawei (2 Antenas)</option>
+                                <option value="ONU BRIDGE">ONU Bridge</option>
+                                <option value="ROUTER MERCUSYS">Router Mercusys</option>
+                            </optgroup>
+                            <optgroup label="Otros">
+                                <option value="JUMPER SC/APC">Jumper SC/APC 3M</option>
+                                <option value="GRAPAS">Grapas (Caja)</option>
+                                <option value="TENSORES">Tensores (Pz)</option>
+                            </optgroup>
+                        </select>
                     </div>
                     
                     <div class="campo">
-    <label>Categoría *</label>
-    <select id="categoria" required onchange="verificarCategoria()">
-        <option value="Equipos">Equipos (ONTs/Routers)</option>
-        <option value="Planta Externa">Planta Externa (Fibras/Jumpers/Herrajes)</option>
-        <option value="Consumibles">Consumibles (Manguitas/Grapas)</option>
-        <option value="Herramientas">Herramientas</option>
-    </select>
-</div>
+                        <label>Categoría *</label>
+                        <select id="categoria" required onchange="verificarCategoria()">
+                            <option value="Equipos">Equipos (ONTs/Routers)</option>
+                            <option value="Planta Externa">Planta Externa (Fibras/Jumpers/Herrajes)</option>
+                            <option value="Consumibles">Consumibles (Manguitas/Grapas)</option>
+                            <option value="Herramientas">Herramientas</option>
+                        </select>
+                    </div>
 
-
-                    <div id="seccion-fibra" style="display: none; background: #f0f7ff; padding: 15px; border-radius: 10px; border-left: 5px solid #3188b2; margin-bottom: 15px;">
+                    <div id="seccion-fibra" style="display: none; background: #f0f7ff; padding: 15px; border-radius: 10px; border-left: 5px solid #004a99; margin-bottom: 15px;">
                         <div class="campo">
-                            <label>Nomenclatura FiberTec (ID Carrete)</label>
-                            <input type="text" id="codigo_fibertec" placeholder="Ej: FT-DROP-1KM-001" style="text-transform: uppercase; font-weight: bold;">
+                            <label>ID Carrete (Generado Automáticamente)</label>
+                            <input type="text" id="codigo_fibertec" readonly style="background: #e9ecef; font-weight: bold; color: #004a99;" placeholder="FT-DROP-XXXX">
                         </div>
                         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
                             <div class="campo">

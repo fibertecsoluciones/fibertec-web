@@ -63,22 +63,37 @@ function renderizarTabla(lista) {
 
 // 5. LÓGICA DE CATEGORÍAS (Esta es la que pedía tu HTML)
 function verificarCategoria() {
-    const nombre = document.getElementById('nombre_articulo').value.toLowerCase();
+    const nombreArt = document.getElementById('nombre_articulo').value;
     const categoria = document.getElementById('categoria').value;
     const seccionFibra = document.getElementById('seccion-fibra');
     const seccionNormal = document.getElementById('seccion-cantidad-normal');
     const unidadMedida = document.getElementById('unidad_medida');
+    const codigoInput = document.getElementById('codigo_fibertec');
+    const idProducto = document.getElementById('productoId').value;
 
-    if (categoria === 'Planta Externa' && (nombre.includes('fibra') || nombre.includes('carrete'))) {
-        if(seccionFibra) seccionFibra.style.display = 'block';
-        if(seccionNormal) seccionNormal.style.display = 'none';
+    // Detectar si es un carrete de fibra
+    const esFibra = nombreArt.includes('FIBRA');
+
+    if (categoria === 'Planta Externa' && esFibra) {
+        seccionFibra.style.display = 'block';
+        seccionNormal.style.display = 'none';
         unidadMedida.value = 'Metros';
         unidadMedida.disabled = true;
+
+        // GENERAR NOMENCLATURA AUTOMÁTICA (Solo si es nuevo)
+        if (!idProducto && !codigoInput.value) {
+            const tipo = nombreArt.includes('DROP') ? 'DROP' : 'ADSS';
+            const randomID = Math.floor(1000 + Math.random() * 9000); // Genera un ID de 4 dígitos
+            codigoInput.value = `FT-${tipo}-${randomID}`;
+        }
     } else {
-        if(seccionFibra) seccionFibra.style.display = 'none';
-        if(seccionNormal) seccionNormal.style.display = 'block';
+        seccionFibra.style.display = 'none';
+        seccionNormal.style.display = 'block';
         unidadMedida.disabled = false;
         if (unidadMedida.value === 'Metros') unidadMedida.value = 'Piezas';
+        
+        // Limpiar código si ya no es fibra y es nuevo
+        if (!idProducto) codigoInput.value = '';
     }
 }
 
