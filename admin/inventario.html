@@ -7,7 +7,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="../css/main.css">
-    <link rel="stylesheet" href="../css/pages/inventario.css"> </head>
+    <link rel="stylesheet" href="../css/pages/inventario.css"> 
+</head>
 <body>
     <div class="container-inventario">
         <header class="header-pagos">
@@ -34,7 +35,7 @@
             <table class="tabla-pagos">
                 <thead>
                     <tr>
-                        <th>Material/Equipo</th>
+                        <th>Nomenclatura / Material</th>
                         <th>Categoría</th>
                         <th>Stock Actual</th>
                         <th>Unidad</th>
@@ -43,77 +44,86 @@
                     </tr>
                 </thead>
                 <tbody id="tablaInventarioBody">
-                    <tr>
-                        <td>Módem ONT Huawei HG8245H</td>
-                        <td>Equipos</td>
-                        <td><strong style="color: #3ea682;">25</strong></td>
-                        <td>Piezas</td>
-                        <td><span class="badge-admin">Disponible</span></td>
-                        <td>
-                            <button class="btn-edit"><i class="fas fa-edit"></i></button>
-                        </td>
-                    </tr>
-                </tbody>
+                    </tbody>
             </table>
         </div>
     </div>
 
-
     <div id="modalInventario" class="modal-usuario" style="display: none;">
-    <div class="modal-usuario-contenido">
-        <div class="modal-header">
-            <h3 id="modalInventarioTitulo"><i class="fas fa-box"></i> Nuevo Material</h3>
-            <span class="modal-close" onclick="cerrarModalInventario()">&times;</span>
-        </div>
-        <div class="modal-body">
-            <form id="formInventario">
-                <input type="hidden" id="productoId">
-                
-                <div class="campo">
-                    <label>Nombre del Material/Equipo *</label>
-                    <input type="text" id="nombre_articulo" required placeholder="Ej: Módem Huawei HG8245H">
-                </div>
-                
-                <div class="campo">
-                    <label>Categoría *</label>
-                    <select id="categoria" required>
-                        <option value="Equipos">ONTs / Routers</option>
-                        <option value="Fibra">Planta Externa (Fibra/Splitters)</option>
-                        <option value="Consumibles">Consumibles (Conectores/Grapas)</option>
-                        <option value="Herramientas">Herramientas</option>
-                    </select>
-                </div>
-
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+        <div class="modal-usuario-contenido">
+            <div class="modal-header">
+                <h3 id="modalInventarioTitulo"><i class="fas fa-box"></i> Nuevo Material</h3>
+                <span class="modal-close" onclick="cerrarModalInventario()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form id="formInventario">
+                    <input type="hidden" id="productoId">
+                    
                     <div class="campo">
-                        <label>Cantidad Actual *</label>
-                        <input type="number" id="cantidad_actual" required min="0" value="0">
+                        <label>Nombre del Material/Equipo *</label>
+                        <input type="text" id="nombre_articulo" required placeholder="Ej: Módem Huawei HG8245H">
                     </div>
+                    
                     <div class="campo">
-                        <label>Stock Mínimo</label>
-                        <input type="number" id="stock_minimo" required min="0" value="5">
+    <label>Categoría *</label>
+    <select id="categoria" required onchange="verificarCategoria()">
+        <option value="Equipos">Equipos (ONTs/Routers)</option>
+        <option value="Planta Externa">Planta Externa (Fibras/Jumpers/Herrajes)</option>
+        <option value="Consumibles">Consumibles (Manguitas/Grapas)</option>
+        <option value="Herramientas">Herramientas</option>
+    </select>
+</div>
+
+
+                    <div id="seccion-fibra" style="display: none; background: #f0f7ff; padding: 15px; border-radius: 10px; border-left: 5px solid #3188b2; margin-bottom: 15px;">
+                        <div class="campo">
+                            <label>Nomenclatura FiberTec (ID Carrete)</label>
+                            <input type="text" id="codigo_fibertec" placeholder="Ej: FT-DROP-1KM-001" style="text-transform: uppercase; font-weight: bold;">
+                        </div>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                            <div class="campo">
+                                <label>Metros Iniciales</label>
+                                <input type="number" id="metros_iniciales" placeholder="1000">
+                            </div>
+                            <div class="campo">
+                                <label>Metros Actuales</label>
+                                <input type="number" id="metros_actuales" placeholder="1000">
+                            </div>
+                        </div>
                     </div>
-                </div>
 
-                <div class="campo">
-                    <label>Unidad de Medida</label>
-                    <select id="unidad_medida">
-                        <option value="Piezas">Piezas</option>
-                        <option value="Metros">Metros</option>
-                        <option value="Kits">Kits</option>
-                    </select>
-                </div>
+                    <div id="seccion-cantidad-normal">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                            <div class="campo">
+                                <label>Cantidad Actual *</label>
+                                <input type="number" id="cantidad_actual" min="0" value="0">
+                            </div>
+                            <div class="campo">
+                                <label>Stock Mínimo</label>
+                                <input type="number" id="stock_minimo" min="0" value="5">
+                            </div>
+                        </div>
+                    </div>
 
-                <div class="botones-form">
-                    <button type="button" class="btn-secundario" onclick="cerrarModalInventario()">Cancelar</button>
-                    <button type="submit" class="btn-primario">
-                        <i class="fas fa-save"></i> Guardar en Almacén
-                    </button>
-                </div>
-            </form>
+                    <div class="campo">
+                        <label>Unidad de Medida</label>
+                        <select id="unidad_medida">
+                            <option value="Piezas">Piezas</option>
+                            <option value="Metros">Metros</option>
+                            <option value="Kits">Kits</option>
+                        </select>
+                    </div>
+
+                    <div class="botones-form">
+                        <button type="button" class="btn-secundario" onclick="cerrarModalInventario()">Cancelar</button>
+                        <button type="submit" class="btn-primario">
+                            <i class="fas fa-save"></i> Guardar en Almacén
+                        </button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
-</div>
 
     <script src="../js/auth.js"></script>
     <script src="../js/inventario.js"></script>
