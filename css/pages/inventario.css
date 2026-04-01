@@ -1,0 +1,43 @@
+/* Buscador y Acciones */
+.busqueda input {
+    padding: 10px 15px;
+    border-radius: 50px;
+    border: 1px solid #e2e8f0;
+    width: 300px;
+    outline: none;
+    transition: 0.3s;
+}
+
+.busqueda input:focus {
+    border-color: #3188b2;
+    box-shadow: 0 0 0 3px rgba(49, 136, 178, 0.1);
+}
+
+/* Botón Editar (Circular y pequeño) */
+.btn-edit {
+    background: #f1f5f9;
+    color: #3188b2;
+    border: none;
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-edit:hover {
+    background: #3188b2;
+    color: white;
+    transform: scale(1.1);
+}
+
+/* Badge de Stock */
+.badge-stock {
+    padding: 5px 12px;
+    border-radius: 15px;
+    font-weight: 600;
+    font-size: 0.85rem;
+}
+
+.stock-bajo { background: #fee2e2; color: #ef4444; }
+.stock-ok { background: #dcfce7; color: #16a34a; }
