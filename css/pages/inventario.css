@@ -1,43 +1,75 @@
-/* Buscador y Acciones */
+/* ========================================
+   FIBERTEC - SECCIÓN INVENTARIO
+   ======================================== */
+
+/* Contenedor principal del módulo */
+.container-inventario {
+    padding: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* Buscador de equipos (ONTs, Fibra, etc.) */
 .busqueda input {
-    padding: 10px 15px;
+    padding: 12px 20px;
     border-radius: 50px;
     border: 1px solid #e2e8f0;
-    width: 300px;
+    width: 350px;
+    font-family: 'Inter', sans-serif;
+    transition: all 0.3s ease;
+    background: #f8fafc;
     outline: none;
-    transition: 0.3s;
 }
 
 .busqueda input:focus {
-    border-color: #3188b2;
-    box-shadow: 0 0 0 3px rgba(49, 136, 178, 0.1);
+    background: white;
+    border-color: #3188b2; /* Azul FiberTec */
+    box-shadow: 0 0 0 4px rgba(49, 136, 178, 0.1);
 }
 
-/* Botón Editar (Circular y pequeño) */
+/* Botón Editar (Específico para las filas de la tabla) */
 .btn-edit {
-    background: #f1f5f9;
+    background: rgba(49, 136, 178, 0.1);
     color: #3188b2;
     border: none;
-    width: 35px;
-    height: 35px;
-    border-radius: 50%;
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: all 0.2s ease;
+    margin-right: 5px;
 }
 
 .btn-edit:hover {
     background: #3188b2;
     color: white;
-    transform: scale(1.1);
+    transform: translateY(-2px);
 }
 
-/* Badge de Stock */
-.badge-stock {
-    padding: 5px 12px;
-    border-radius: 15px;
+/* Botón Eliminar (Rojo para alertas) */
+.btn-delete {
+    background: rgba(255, 107, 107, 0.1);
+    color: #ff6b6b;
+    border: none;
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-delete:hover {
+    background: #ff6b6b;
+    color: white;
+}
+
+/* Badges de disponibilidad */
+.status-stock {
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 12px;
     font-weight: 600;
-    font-size: 0.85rem;
 }
 
-.stock-bajo { background: #fee2e2; color: #ef4444; }
 .stock-ok { background: #dcfce7; color: #16a34a; }
+.stock-critico { background: #fee2e2; color: #ef4444; }
