@@ -35,9 +35,10 @@ function renderizarTabla(lista) {
     tbody.innerHTML = '';
 
     lista.forEach(item => {
-        const claseStock = item.cantidad_actual <= item.stock_minimo ? 'stock-bajo' : 'stock-ok';
+        // Prioridad: Si hay metros_actuales, usamos ese stock, si no, cantidad_actual
+        const stockReal = item.metros_actuales !== null ? item.metros_actuales : item.cantidad_actual;
+        const claseStock = stockReal <= item.stock_minimo ? 'stock-bajo' : 'stock-ok';
         
-        // Nomenclatura para Carretes
         const nombreDisplay = item.codigo_fibertec 
             ? `<span class="nomenclatura-ft">${item.codigo_fibertec}</span><br><strong>${item.nombre_articulo}</strong>`
             : `<strong>${item.nombre_articulo}</strong>`;
@@ -46,12 +47,12 @@ function renderizarTabla(lista) {
             <tr>
                 <td>${nombreDisplay}</td>
                 <td>${item.categoria}</td>
-                <td><span class="badge-stock ${claseStock}">${item.cantidad_actual}</span></td>
+                <td><span class="badge-stock ${claseStock}">${stockReal}</span></td>
                 <td>${item.unidad_medida}</td>
-                <td>${item.cantidad_actual > 0 ? '✅ Disponible' : '❌ Agotado'}</td>
+                <td>${stockReal > 0 ? '✅ Disponible' : '❌ Agotado'}</td>
                 <td>
                     <button class="btn-edit" onclick="editarProducto(${item.id})"><i class="fas fa-edit"></i></button>
-                    <button class="btn-edit" style="color:#ff6b6b; background:rgba(255,107,107,0.1);" onclick="eliminarProducto(${item.id})"><i class="fas fa-trash"></i></button>
+                    <button class="btn-edit" style="color:#ff6b6b;" onclick="eliminarProducto(${item.id})"><i class="fas fa-trash"></i></button>
                 </td>
             </tr>
         `;
@@ -127,6 +128,8 @@ formInventario.onsubmit = async (e) => {
     const id = document.getElementById('productoId').value;
     const nombre = document.getElementById('nombre_articulo').value.toLowerCase();
     const categoria = document.getElementById('categoria').value;
+    
+    // Detectamos si es carrete para FiberTec
     const esCarrete = (categoria === 'Planta Externa' && (nombre.includes('fibra') || nombre.includes('carrete')));
 
     const datos = {
@@ -134,9 +137,13 @@ formInventario.onsubmit = async (e) => {
         categoria: categoria,
         stock_minimo: parseInt(document.getElementById('stock_minimo').value),
         unidad_medida: document.getElementById('unidad_medida').value,
-        cantidad_actual: esCarrete ? parseInt(document.getElementById('metros_actuales').value) : parseInt(document.getElementById('cantidad_actual').value),
+        
+        // Si es carrete, mandamos los datos a las columnas de METROS
+        // Si no, mandamos a CANTIDAD NORMAL
+        cantidad_actual: esCarrete ? 0 : parseInt(document.getElementById('cantidad_actual').value),
         codigo_fibertec: esCarrete ? document.getElementById('codigo_fibertec').value.toUpperCase() : null,
-        metros_iniciales: esCarrete ? parseInt(document.getElementById('metros_iniciales').value) : null
+        metros_iniciales: esCarrete ? parseInt(document.getElementById('metros_iniciales').value) : null,
+        metros_actuales: esCarrete ? parseInt(document.getElementById('metros_actuales').value) : null
     };
 
     try {
@@ -149,7 +156,9 @@ formInventario.onsubmit = async (e) => {
             cerrarModalInventario();
             cargarInventario();
         }
-    } catch (err) { alert("Error al guardar"); }
+    } catch (err) { 
+        alert("Error al conectar con el servidor de FiberTec"); 
+    }
 };
 
 // 9. ELIMINAR
