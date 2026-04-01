@@ -11,14 +11,19 @@
 </head>
 <body>
     <div class="container-pagos">
-        <header class="header-pagos">
-     
-            <h1>💰 Control de Pagos</h1>
-            <p>Gestiona los pagos de tus clientes</p>
-            <button class="btn-cerrar-sesion" onclick="cerrarSesion()">
-            <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
+      <header class="header-pagos">
+    <button class="btn-cerrar-sesion" onclick="cerrarSesion()">
+        <i class="fas fa-sign-out-alt"></i> Salir
     </button>
-        </header>
+
+    <div class="logo-pagos">
+        <span>Fiber<span>Tec</span></span>
+        <span class="badge-admin" id="rolBadge">ADMIN</span>
+    </div>
+    
+    <h1>💰 Control de Pagos</h1>
+    <p>Bienvenido, <strong id="userNameDisplay">Cargando...</strong></p>
+</header>
 
         <!-- Resumen de cobranza -->
         <div class="resumen-cobranza">
